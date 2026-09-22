@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ton Nom — Développeur Roblox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2F6FED;
+    --blue-deep: #133C8C;
+    --ink: #10213D;
+    --muted: #5B6B85;
+    --glass: rgba(255,255,255,0.55);
+    --glass-strong: rgba(255,255,255,0.75);
+    --border: rgba(255,255,255,0.7);
+    --shadow: rgba(47,111,237,0.18);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.6;
+    background: linear-gradient(180deg, #EAF2FF 0%, #F6FAFF 45%, #FFFFFF 100%);
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { font-family: 'Sora', 'Inter', sans-serif; margin: 0; color: var(--blue-deep); }
+
+  /* floating blurred orbs */
+  .orb { position: fixed; border-radius: 50%; filter: blur(60px); z-index: 0; pointer-events: none; opacity: 0.55; }
+  .orb1 { width: 420px; height: 420px; background: #8FB8FF; top: -120px; left: -100px; animation: float1 22s ease-in-out infinite; }
+  .orb2 { width: 360px; height: 360px; background: #C9E0FF; top: 40vh; right: -140px; animation: float2 26s ease-in-out infinite; }
+  .orb3 { width: 300px; height: 300px; background: #DCEBFF; bottom: -100px; left: 20vw; animation: float1 30s ease-in-out infinite reverse; }
+  @keyframes float1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(40px,60px); } }
+  @keyframes float2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-50px,40px); } }
+  @media (prefers-reduced-motion: reduce) { .orb { animation: none; } }
+
+  nav.glass {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem 1.5rem; margin: 1rem auto 0; max-width: 900px;
+    border-radius: 16px;
+  }
+  nav .brand { font-family: 'Sora', sans-serif; font-weight: 700; color: var(--blue-deep); }
+  nav a { color: var(--muted); text-decoration: none; font-size: 0.92rem; margin-left: 1.4rem; }
+  nav a:hover { color: var(--blue); }
+
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 30px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .glass::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: radial-gradient(200px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.85), transparent 60%);
+    transition: opacity 0.25s ease;
+  }
+  .glass:hover::before { opacity: 1; }
+
+  header { max-width: 760px; margin: 4rem auto 0; padding: 3rem 2rem; border-radius: 24px; position: relative; z-index: 1; }
+  .tag { color: var(--blue); font-weight: 600; font-size: 0.95rem; }
+  header h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 700; margin-top: 0.6rem; letter-spacing: -0.02em; }
+  header p.role { color: var(--muted); font-size: 1.2rem; margin-top: 0.8rem; }
+  header p.pitch { margin-top: 1.5rem; max-width: 60ch; font-size: 1.05rem; }
+
+  .links { margin-top: 2rem; display: flex; gap: 0.9rem; flex-wrap: wrap; }
+  .links a.btn {
+    color: var(--blue-deep); text-decoration: none;
+    padding: 0.65rem 1.3rem; border-radius: 999px;
+    font-size: 0.92rem; font-weight: 500;
+    background: var(--glass-strong);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 14px var(--shadow);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .links a.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px var(--shadow); }
+  .links a.btn:active { transform: translateY(0) scale(0.96); }
+
+  main { max-width: 760px; margin: 0 auto; padding: 0 1.5rem 5rem; position: relative; z-index: 1; }
+  section { padding: 3rem 0; }
+  section h2 { font-size: 1.6rem; margin-bottom: 1.6rem; }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  .skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+  .skill { border-radius: 16px; padding: 1.3rem; }
+  .skill .lvl { color: var(--blue); font-size: 0.82rem; font-weight: 600; }
+  .skill h3 { font-size: 1.02rem; margin-top: 0.4rem; color: var(--ink); }
+
+  .projects { display: flex; flex-direction: column; gap: 1.1rem; }
+  .project { border-radius: 18px; padding: 1.7rem; }
+  .project h3 { font-size: 1.15rem; color: var(--ink); }
+  .project .meta { color: var(--muted); font-size: 0.88rem; margin-top: 0.3rem; }
+  .project p { margin-top: 0.8rem; }
+  .project .stack { margin-top: 0.9rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .project .stack span { color: var(--blue-deep); font-size: 0.8rem; background: rgba(255,255,255,0.7); padding: 0.25rem 0.65rem; border-radius: 999px; border: 1px solid var(--border); }
+
+  .about { border-radius: 18px; padding: 1.8rem; }
+  .about p { max-width: 62ch; }
+
+  footer {
+    max-width: 760px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem;
+    color: var(--muted); font-size: 0.9rem; position: relative; z-index: 1;
+  }
+  footer a { color: var(--blue); text-decoration: none; }
+
+  ::selection { background: var(--blue); color: #fff; }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<nav class="glass">
+  <span class="brand">ZariDev</span>
+  <div>
+    <a href="#about">À propos</a>
+    <a href="#skills">Compétences</a>
+    <a href="#projects">Projets</a>
+  </div>
+</nav>
+
+<header class="glass reveal">
+  <div class="tag">Développeur Roblox</div>
+  <h1>Ton Nom</h1>
+  <p class="role">Scripting · Building · UI · Game Design</p>
+  <p class="pitch">
+    Remplace ce paragraphe par une présentation courte de toi : depuis combien de temps tu développes sur Roblox,
+    ce que tu aimes construire, et ce que tu cherches (collaboration, studio, projet perso).
+  </p>
+  <div class="links">
+    <a class="btn" href="#">Roblox Profil</a>
+    <a class="btn" href="#">DevForum</a>
+    <a class="btn" href="#">GitHub</a>
+    <a class="btn" href="#">Discord</a>
+  </div>
+</header>
+
+<main>
+  <section id="about" class="about glass reveal">
+    <h2>À propos</h2>
+    <p>
+      Écris ici 3 à 5 phrases sur ton parcours : comment tu as commencé, les outils que tu maîtrises
+      (Luau, Roblox Studio, Blender...), et ce qui te distingue en tant que développeur généraliste.
+    </p>
+  </section>
+
+  <section id="skills">
+    <h2 class="reveal">Compétences</h2>
+    <div class="skills">
+      <div class="skill glass reveal"><div class="lvl">Confirmé</div><h3>Scripting Luau</h3></div>
+      <div class="skill glass reveal"><div class="lvl">Confirmé</div><h3>Building</h3></div>
+      <div class="skill glass reveal"><div class="lvl">Intermédiaire</div><h3>UI / UX</h3></div>
+      <div class="skill glass reveal"><div class="lvl">Intermédiaire</div><h3>Game Design</h3></div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <h2 class="reveal">Projets</h2>
+    <div class="projects">
+      <div class="project glass reveal">
+        <h3>[Nom du projet]</h3>
+        <div class="meta">[Solo / Équipe] · [Année] · [Lien vers le jeu]</div>
+        <p>Décris le projet : le concept, ton rôle précis, et un résultat concret (joueurs, visites, ce que tu as appris).</p>
+        <div class="stack"><span>Luau</span><span>UI</span><span>Building</span></div>
+      </div>
+      <div class="project glass reveal">
+        <h3>[Nom du projet]</h3>
+        <div class="meta">[Solo / Équipe] · [Année] · [Lien vers le jeu]</div>
+        <p>Décris le projet : le concept, ton rôle précis, et un résultat concret.</p>
+        <div class="stack"><span>Game Design</span><span>Scripting</span></div>
+      </div>
+      <div class="project glass reveal">
+        <h3>[Nom du projet]</h3>
+        <div class="meta">[Solo / Équipe] · [Année] · [Lien vers le jeu]</div>
+        <p>Décris le projet : le concept, ton rôle précis, et un résultat concret.</p>
+        <div class="stack"><span>Building</span><span>UI</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Pour me contacter : remplace par ton <a href="#">Discord</a> ou ton email.
+</footer>
+
+<script>
+  // reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // glass sheen follows cursor
+  document.querySelectorAll('.glass').forEach(el => {
+    el.addEventListener('mousemove', (e) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    });
+  });
+</script>
+
+</body>
+</html>
