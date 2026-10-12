@@ -176,14 +176,14 @@
   .stat .lbl { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
 
   /* services */
-  .services { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+  .services { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.3rem; }
   .service { border-radius: 18px; padding: 1.4rem; transform-style: preserve-3d; transition: transform 0.12s ease; }
   .service .ic { font-size: 1.6rem; }
   .service h3 { font-size: 1.02rem; margin-top: 0.6rem; }
   .service p { color: var(--muted); font-size: 0.86rem; margin-top: 0.4rem; }
 
   /* skill bars */
-  .skillsgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+  .skillsgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.3rem; }
   .skillcard { border-radius: 18px; padding: 1.3rem; text-align: center; transition: transform 0.45s cubic-bezier(.2,.8,.2,1), box-shadow 0.4s ease, opacity 0.4s ease, filter 0.4s ease; }
   .skillcard:hover { transform: translateY(-4px); }
   .skillcard .ring { width: 84px; height: 84px; transform: rotate(-90deg); }
@@ -193,7 +193,12 @@
     filter: drop-shadow(0 0 6px rgba(47,111,237,0.6)); }
   .skillcard .pct { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; }
   .skillcard .lbl { color: var(--muted); font-size: 0.85rem; margin-top: 0.1rem; }
-  .skillcard.dimmed { opacity: 0.5; filter: brightness(0.55) saturate(70%); }
+  /* assombrissement fluide : un voile qui apparaît en fondu (au lieu d'animer filter/opacity sur des cartes en verre, ce qui saccade) */
+  .skillcard::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
+    background: rgba(6, 18, 56, 0.5); opacity: 0; transition: opacity 0.7s ease; }
+  .skillcard.dimmed::after { opacity: 1; }
+  .skillcard.dimmed { transform: scale(0.96); }
+  .skillcard.spotlight, .skillcard.dimmed { will-change: transform; }
   .skillcard.spotlight { transform: translateY(-14px) scale(1.07) !important; box-shadow: 0 22px 50px rgba(47,111,237,0.55), 0 0 0 3px #2F6FED, inset 0 1px 0 rgba(255,255,255,0.8); z-index: 5; }
 
 
@@ -265,6 +270,17 @@
 
   ::selection { background: var(--blue-deep); color: #fff; }
   :focus-visible { outline: 2px solid var(--blue-deep); outline-offset: 2px; }
+  /* parallaxe dans les cartes : icône / titre / texte suivent la souris à des profondeurs différentes */
+  /* --d = profondeur de la couche (1 = devant, petit = derrière) ; --dx/--dy = souris ; --sy = position de la carte à l'écran */
+  .service .ic, .skillcard .ring { --d: 1; }
+  .service h3, .skillcard .pct { --d: 0.55; }
+  .service p, .skillcard .lbl { --d: 0.28; }
+  .service .ic, .service h3, .service p, .skillcard .ring, .skillcard .pct, .skillcard .lbl {
+    translate: calc(var(--dx, 0) * 10px * var(--d)) calc(var(--dy, 0) * 10px * var(--d) + var(--sy, 0) * -6px * var(--d)); }
+  .tilt-soft { transition: transform 0.25s ease-out; }
+  /* survol façon guns.lol : la carte grossit un peu, se penche vers la souris et passe devant ses voisines */
+  .service.tilt, .skillcard.tilt { transition: transform 0.4s cubic-bezier(.2,.8,.2,1), box-shadow 0.5s ease; }
+  .service.tilt:hover, .skillcard.tilt:hover { z-index: 6; box-shadow: 0 26px 60px rgba(11,37,89,0.38), inset 0 1px 0 rgba(255,255,255,0.8); }
   @media (max-width: 640px) {
     .glass { backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); }
     .nebula-clouds { animation: none; }
@@ -431,11 +447,9 @@
 
   const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-  // stagger delay for items inside the same grid/list
-  ['.stats', '.services', '.projects'].forEach(sel => {
-    document.querySelectorAll(sel + ' > .reveal').forEach((el, i) => { el.style.transitionDelay = (i * 90) + 'ms'; });
-  });
-  document.querySelectorAll('.skillrow').forEach((el, i) => { el.style.transitionDelay = (i * 90) + 'ms'; });
+  // les cartes de "Ce que je fais" apparaissent l'une après l'autre (délai sur l'animation d'entrée uniquement :
+  // un délai sur les transitions retardait l'effet de survol de toutes les cartes sauf la première)
+  document.querySelectorAll('.services > .reveal').forEach((el, i) => { el.style.animationDelay = (i * 90) + 'ms'; });
 
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => {
@@ -470,18 +484,37 @@
   });
 
   // click a service card -> scroll to matching skill and highlight it
+  let spotStart = null, spotEnd = null, spotToken = 0;
+  // attend que le défilement automatique soit vraiment terminé (position stable pendant quelques images)
+  function afterScrollSettles(cb) {
+    let last = -1, still = 0, tries = 0;
+    const tick = () => {
+      const y = window.scrollY; tries++;
+      still = Math.abs(y - last) < 1 ? still + 1 : 0;
+      last = y;
+      if (still >= 5 || tries > 120) cb(); else requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
   document.querySelectorAll('.service[data-goto]').forEach(card => {
     card.addEventListener('click', () => {
       const target = document.getElementById(card.dataset.goto);
       if (!target) return;
       target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       const siblings = document.querySelectorAll('.skillcard');
-      siblings.forEach(s => { if (s !== target) s.classList.add('dimmed'); });
-      target.classList.add('spotlight');
-      setTimeout(() => {
-        target.classList.remove('spotlight');
-        siblings.forEach(s => s.classList.remove('dimmed'));
-      }, 5000);
+      clearTimeout(spotStart); clearTimeout(spotEnd);
+      siblings.forEach(s => s.classList.remove('spotlight', 'dimmed'));
+      // on attend que le défilement soit vraiment fini avant de zoomer : le zoom et le fondu ne saccadent plus
+      const token = ++spotToken;
+      afterScrollSettles(() => {
+        if (token !== spotToken) return;
+        siblings.forEach(s => { if (s !== target) s.classList.add('dimmed'); });
+        target.classList.add('spotlight');
+        spotEnd = setTimeout(() => {
+          target.classList.remove('spotlight');
+          siblings.forEach(s => s.classList.remove('dimmed'));
+        }, 5000);
+      });
     });
   });
 
@@ -663,6 +696,32 @@
   })();
 
   // ---- scroll : barre de progression + parallaxe du haut de page (1 mise à jour par image, pas par événement) ----
+  const reduceMotionPx = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pxGroups = Array.from(document.querySelectorAll('.services, .skillsgrid')).map(g => ({
+    g, cards: Array.from(g.children).map((el, i) => { el.classList.add('layered'); return { el, s: i % 2 ? 0.07 : 0.03 }; })
+  }));
+  function updateCardParallax() {
+    if (reduceMotionPx) return;
+    const vh = window.innerHeight;
+    const todo = [];
+    // 1) on lit toutes les positions, 2) on écrit ensuite (évite de recalculer la page à chaque carte)
+    pxGroups.forEach(({ g, cards }) => {
+      const r = g.getBoundingClientRect();
+      if (r.bottom < -300 || r.top > vh + 300) return;
+      const off = Math.max(-400, Math.min(400, r.top + r.height / 2 - vh / 2));
+      cards.forEach(({ el, s }) => {
+        const cr = el.getBoundingClientRect();
+        const sy = Math.max(-1, Math.min(1, (cr.top + cr.height / 2 - vh / 2) / (vh / 2)));
+        todo.push([el, off * s, sy]);
+      });
+    });
+    todo.forEach(([el, ty, sy]) => {
+      el.style.translate = `0 ${ty.toFixed(1)}px`;   // la carte dérive à sa vitesse
+      el.style.setProperty('--sy', sy.toFixed(3));    // le texte/l'icône dedans glissent à une autre vitesse
+    });
+  }
+  window.addEventListener('resize', updateCardParallax);
+
   const progress = document.getElementById('progress');
   const heroInner = document.getElementById('hero-inner');
   const navEl = document.querySelector('nav.glass');
@@ -673,6 +732,7 @@
     const max = document.documentElement.scrollHeight - window.innerHeight;
     progress.style.transform = `scaleX(${max > 0 ? sy / max : 0})`;
     navEl.classList.toggle('scrolled', sy > 40);
+    updateCardParallax();
     if (sy < 700) {
       heroDone = false;
       heroInner.style.transform = `translateY(${sy * 0.18}px)`;
@@ -686,6 +746,7 @@
   onScroll();
 
   // effets de survol (souris uniquement : inutiles et coûteux sur téléphone)
+  document.querySelectorAll('header.glass, #about, #contact, .gallery-wrap').forEach(el => el.classList.add('tilt-soft'));
   if (canHover) {
     document.querySelectorAll('.glass').forEach(el => {
       let raf = 0, lastE = null;
@@ -698,15 +759,19 @@
           const r = el.getBoundingClientRect();
           const px = (lastE.clientX - r.left) / r.width, py = (lastE.clientY - r.top) / r.height;
           el.style.setProperty('--mx', (px*100)+'%'); el.style.setProperty('--my', (py*100)+'%');
+          if (el.classList.contains('layered')) { el.style.setProperty('--dx', (px - 0.5).toFixed(3)); el.style.setProperty('--dy', (py - 0.5).toFixed(3)); }
           if (el.classList.contains('tilt')) {
-            el.style.transform = `perspective(700px) rotateX(${(0.5-py)*10}deg) rotateY(${(px-0.5)*10}deg) translateY(-3px)`;
+            el.style.transform = `perspective(800px) rotateX(${(0.5-py)*18}deg) rotateY(${(px-0.5)*18}deg) scale(1.07)`;
+          } else if (el.classList.contains('tilt-soft')) {
+            el.style.transform = `perspective(1000px) rotateX(${(0.5-py)*5}deg) rotateY(${(px-0.5)*5}deg) scale(1.012)`;
           }
         });
       });
       el.addEventListener('mouseleave', () => {
         lastE = null;
         if (raf) { cancelAnimationFrame(raf); raf = 0; }
-        if (el.classList.contains('tilt')) el.style.transform = '';
+        if (el.classList.contains('tilt') || el.classList.contains('tilt-soft')) el.style.transform = '';
+        if (el.classList.contains('layered')) { el.style.setProperty('--dx', 0); el.style.setProperty('--dy', 0); }
       });
     });
   }
