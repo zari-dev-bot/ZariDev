@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#2E6BFF">
+<meta name="description" content="Zari, 17 ans, développeur Roblox : 3D / Blender, Mapper, VFX, GFX, UI, Luau et UGC. Découvre mes créations.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Zari — Développeur Roblox">
+<meta property="og:description" content="3D / Blender, Mapper, VFX, GFX, UI, Luau et UGC. Découvre mes créations.">
+<meta property="og:image" content="https://portfolio.zari-studio.com/media/apercu.jpg">
+<meta property="og:url" content="https://portfolio.zari-studio.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://portfolio.zari-studio.com/media/apercu.jpg">
+<title>Zari — Développeur Roblox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: only light;
+    --blue-deep: #0B2559;
+    --ink: #0C2352;
+    --muted: #3E5480;
+    --glass: rgba(255,255,255,0.22);
+    --glass-strong: rgba(255,255,255,0.4);
+    --border: rgba(255,255,255,0.65);
+    --shadow: rgba(11,37,89,0.3);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+  body {
+    margin: 0; color: var(--ink); font-family: 'Inter', system-ui, sans-serif; line-height: 1.6;
+    background: #2E6BFF; overflow-x: hidden; min-height: 100%; cursor: none;
+  }
+  body::before { content: ""; position: fixed; inset: 0; z-index: -3; pointer-events: none;
+    background: linear-gradient(160deg, #1747D6 0%, #2E6BFF 26%, #6FA0FF 52%, #B7D5FF 78%, #EAF3FF 100%); }
+  h1, h2, h3 { font-family: 'Sora', 'Inter', sans-serif; margin: 0; color: var(--blue-deep); }
+  a, button, .btn { cursor: none; }
+
+  .noise { position: fixed; inset: 0; z-index: 6; pointer-events: none; opacity: 0.04;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+
+  /* progress bar */
+  #progress { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; height: 3px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 20;
+    background: linear-gradient(90deg, #4C86FF, #8FE9E0); box-shadow: 0 0 10px rgba(76,134,255,0.6); }
+
+  #cursor { position: fixed; top: 0; left: 0; width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(10,20,40,0.55); filter: blur(4px);
+    pointer-events: none; z-index: 999; transform: translate(-50%,-50%); will-change: transform;
+    transition: width 0.25s ease, height 0.25s ease; }
+  #cursor.big { width: 40px; height: 40px; }
+  #cursor-dot { display: none; }
+
+  .nebula-clouds { position: fixed; inset: -12%; z-index: -2; pointer-events: none; opacity: 0.45; will-change: transform;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='900'><filter id='n1'><feTurbulence type='fractalNoise' baseFrequency='0.010 0.016' numOctaves='4' seed='11' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='matrix' values='0 0 0 0 0.42  0 0 0 0 0.55  0 0 0 0 0.97  0 0 0 0.9 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n1)'/></svg>");
+    background-size: 900px 900px; animation: nebulaDrift 90s ease-in-out infinite alternate; }
+  .nebula-clouds.layer2 { z-index: -2; opacity: 0.28;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1100' height='1100'><filter id='n2'><feTurbulence type='fractalNoise' baseFrequency='0.006 0.010' numOctaves='3' seed='42' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='matrix' values='0 0 0 0 0.98  0 0 0 0 0.62  0 0 0 0 0.9  0 0 0 0.8 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n2)'/></svg>");
+    background-size: 1100px 1100px; animation: nebulaDriftReverse 120s ease-in-out infinite alternate; }
+  @keyframes nebulaDrift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-5%, 3%, 0); } }
+  @keyframes nebulaDriftReverse { from { transform: translate3d(0,0,0); } to { transform: translate3d(4%, -3%, 0); } }
+
+  .starfield { position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-repeat: no-repeat;
+    background-image:
+      radial-gradient(1.6px 1.6px at 10% 20%, rgba(255,255,255,0.95), transparent 60%),
+      radial-gradient(1.2px 1.2px at 25% 65%, rgba(255,255,255,0.75), transparent 60%),
+      radial-gradient(2px 2px at 40% 12%, rgba(255,255,255,0.9), transparent 60%),
+      radial-gradient(1.2px 1.2px at 55% 78%, rgba(255,255,255,0.65), transparent 60%),
+      radial-gradient(1.6px 1.6px at 70% 30%, rgba(255,255,255,0.95), transparent 60%),
+      radial-gradient(1.2px 1.2px at 85% 55%, rgba(255,255,255,0.7), transparent 60%),
+      radial-gradient(2px 2px at 92% 18%, rgba(255,255,255,0.85), transparent 60%),
+      radial-gradient(1.2px 1.2px at 15% 85%, rgba(255,255,255,0.65), transparent 60%),
+      radial-gradient(1.6px 1.6px at 60% 45%, rgba(255,255,255,0.8), transparent 60%),
+      radial-gradient(1.2px 1.2px at 33% 40%, rgba(255,255,255,0.6), transparent 60%),
+      radial-gradient(1.8px 1.8px at 80% 82%, rgba(255,255,255,0.85), transparent 60%),
+      radial-gradient(1.2px 1.2px at 5% 50%, rgba(255,255,255,0.6), transparent 60%);
+    animation: twinkle 5s ease-in-out infinite alternate; }
+  @keyframes twinkle { from { opacity: 0.55; } to { opacity: 1; } }
+
+  .orbwrap { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  .orb { position: absolute; will-change: transform;
+    -webkit-mask-image: radial-gradient(closest-side, #000 45%, transparent 100%);
+    mask-image: radial-gradient(closest-side, #000 45%, transparent 100%); }
+  .orb1 { width: 480px; height: 480px; opacity: 0.6; top: -150px; left: -120px; animation-duration: 11s;
+    background: radial-gradient(circle at 32% 32%, #9FF6EE, transparent 62%), radial-gradient(circle at 68% 62%, #6FA0FF, transparent 58%), radial-gradient(circle at 50% 80%, #B08CFF, transparent 60%); }
+  .orb2 { width: 400px; height: 400px; opacity: 0.55; top: 26vh; right: -170px; animation-duration: 13s;
+    background: radial-gradient(circle at 38% 35%, #C6A6FF, transparent 60%), radial-gradient(circle at 65% 65%, #FF9DE0, transparent 55%), radial-gradient(circle at 20% 70%, #7FF0FF, transparent 55%); }
+  .orb3 { width: 360px; height: 360px; opacity: 0.42; bottom: -130px; left: 16vw; animation-duration: 15s;
+    background: radial-gradient(circle at 50% 45%, #FFFFFF, transparent 65%), radial-gradient(circle at 70% 70%, #B7D5FF, transparent 55%); }
+  .orb4 { width: 280px; height: 280px; opacity: 0.45; bottom: 6vh; right: 8vw; animation-duration: 10s;
+    background: radial-gradient(circle at 45% 40%, #4FF0D0, transparent 58%), radial-gradient(circle at 70% 65%, #6FA0FF, transparent 55%); }
+  .orb5 { width: 220px; height: 220px; opacity: 0.38; top: 55vh; left: 45vw; animation-duration: 12s;
+    background: radial-gradient(circle at 50% 50%, #FFB3EC, transparent 60%), radial-gradient(circle at 30% 70%, #B08CFF, transparent 55%); }
+  @keyframes blob {
+    0%, 100% { border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%; }
+    33% { border-radius: 60% 40% 38% 62% / 55% 65% 35% 45%; }
+    66% { border-radius: 48% 52% 60% 40% / 35% 55% 45% 65%; }
+  }
+
+
+  nav.glass { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; display: flex; justify-content: space-between;
+    align-items: center; padding: 0.9rem 1.5rem; margin: 1rem auto 0; width: min(920px, calc(100% - 2rem)); border-radius: 16px; gap: 0.6rem;
+    transition: padding 0.3s ease, background 0.3s ease; }
+  nav.glass.scrolled { padding: 0.55rem 1.5rem; background: var(--glass-strong); }
+  nav .brand { font-family: 'Sora', sans-serif; font-weight: 700; color: var(--blue-deep); }
+  nav a { color: var(--blue-deep); opacity: 0.75; text-decoration: none; font-size: 0.92rem; margin-left: 1.3rem; position: relative; display: inline-block; white-space: nowrap; }
+  nav a::after { content: ""; position: absolute; left: 0; bottom: -3px; width: 0; height: 2px; background: var(--blue-deep); transition: width 0.25s ease; }
+  nav a:hover { opacity: 1; transform: translateY(-2px); } nav a:hover::after { width: 100%; }
+
+  .glass { background: var(--glass); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid var(--border); box-shadow: 0 14px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.65);
+    position: relative; overflow: hidden; }
+  .glass::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: radial-gradient(280px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.95), transparent 60%);
+    transition: opacity 0.25s ease; }
+  .glass:hover::before { opacity: 1; }
+
+  header { width: min(732px, calc(100% - 3rem)); margin: 4rem auto 0; padding: 3.2rem 2rem; border-radius: 26px; position: relative; z-index: 1; }
+  .tag { color: var(--blue-deep); font-weight: 600; font-size: 0.95rem; }
+  header h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); font-weight: 800; margin-top: 0.6rem; letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #0A2A6B, #1E7BFF, #2FD0F0, #1E7BFF, #0A2A6B); background-size: 100% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  @keyframes gradientmove { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  header p.role { color: var(--muted); font-size: 1.2rem; margin-top: 0.8rem; }
+  header p.pitch { margin-top: 1.5rem; max-width: 60ch; font-size: 1.05rem; }
+
+  .links { margin-top: 2rem; display: flex; gap: 0.9rem; flex-wrap: wrap; }
+  .btn { color: var(--blue-deep); text-decoration: none; padding: 0.65rem 1.3rem; border-radius: 999px; font-size: 0.92rem;
+    font-weight: 500; background: var(--glass-strong); border: 1px solid var(--border); box-shadow: 0 6px 18px var(--shadow);
+    transition: transform 0.15s cubic-bezier(.2,.9,.3,1.3), box-shadow 0.18s ease; cursor: none; display: inline-block; }
+  .btn:hover { box-shadow: 0 16px 34px var(--shadow); }
+  .btn:active { transform: scale(0.92) !important; }
+  .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.8); transform: scale(0); animation: rip 0.6s ease-out forwards; pointer-events: none; }
+  @keyframes rip { to { transform: scale(3); opacity: 0; } }
+
+  main { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; position: relative; z-index: 1; }
+  section { padding: 3rem 0; }
+  section h2 { font-size: 1.6rem; margin-bottom: 1.6rem; }
+  section .sub { color: var(--muted); margin-top: -1.1rem; margin-bottom: 1.6rem; font-size: 0.95rem; }
+
+  .reveal { opacity: 0; transform: translateY(55px) scale(0.88) rotate(-1.5deg); }
+  .reveal.visible { animation: revealIn 0.85s cubic-bezier(.34,1.56,.64,1) forwards; }
+  @keyframes revealIn { from { opacity: 0; transform: translateY(55px) scale(0.88) rotate(-1.5deg); } to { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); } }
+
+
+  /* once the entrance animation finishes, drop it so :hover / JS tilt regain control of transform */
+  .reveal.settled { animation: none; opacity: 1; transform: none; }
+
+  .tilt, .service, .stat, .skillcard { transition: transform 0.12s ease; }
+  #hero-inner { transition: transform 0.05s linear, opacity 0.05s linear; }
+
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .service .ic { display: inline-block; font-size: 1.6rem; animation: floaty 3.2s ease-in-out infinite; }
+  .service:nth-child(2) .ic { animation-delay: 0.4s; }
+  .service:nth-child(3) .ic { animation-delay: 0.8s; }
+  .service:nth-child(4) .ic { animation-delay: 1.2s; }
+  .service:nth-child(5) .ic { animation-delay: 1.6s; }
+  .service:nth-child(6) .ic { animation-delay: 2s; }
+
+  @keyframes breathe { 0%,100% { box-shadow: 0 14px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.65); } 50% { box-shadow: 0 14px 55px rgba(76,134,255,0.45), inset 0 1px 0 rgba(255,255,255,0.8); } }
+
+  .btn .ic-inline, .service, .stat, .project { transition: transform 0.12s ease; }
+
+  /* stats */
+  .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+  .stat { border-radius: 18px; padding: 1.4rem 1rem; text-align: center; transition: transform 0.2s ease; }
+  .stat:hover { transform: translateY(-4px) scale(1.03); }
+  @keyframes pulseglow { 0%,100% { box-shadow: 0 6px 18px var(--shadow); } 50% { box-shadow: 0 6px 26px rgba(76,134,255,0.55); } }
+  .stat .num { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 2rem; color: var(--blue-deep); }
+  .stat .lbl { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
+
+  /* services */
+  .services { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+  .service { border-radius: 18px; padding: 1.4rem; transform-style: preserve-3d; transition: transform 0.12s ease; }
+  .service .ic { font-size: 1.6rem; }
+  .service h3 { font-size: 1.02rem; margin-top: 0.6rem; }
+  .service p { color: var(--muted); font-size: 0.86rem; margin-top: 0.4rem; }
+
+  /* skill bars */
+  .skillsgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+  .skillcard { border-radius: 18px; padding: 1.3rem; text-align: center; transition: transform 0.45s cubic-bezier(.2,.8,.2,1), box-shadow 0.4s ease, opacity 0.4s ease, filter 0.4s ease; }
+  .skillcard:hover { transform: translateY(-4px); }
+  .skillcard .ring { width: 84px; height: 84px; transform: rotate(-90deg); }
+  .skillcard .ring-bg { fill: none; stroke: rgba(255,255,255,0.4); stroke-width: 8; }
+  .skillcard .ring-fill { fill: none; stroke: #2F6FED; stroke-width: 8; stroke-linecap: round;
+    stroke-dasharray: 226; stroke-dashoffset: 226; transition: stroke-dashoffset 1.3s cubic-bezier(.2,.8,.2,1);
+    filter: drop-shadow(0 0 6px rgba(47,111,237,0.6)); }
+  .skillcard .pct { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; }
+  .skillcard .lbl { color: var(--muted); font-size: 0.85rem; margin-top: 0.1rem; }
+  .skillcard.dimmed { opacity: 0.5; filter: brightness(0.55) saturate(70%); }
+  .skillcard.spotlight { transform: translateY(-14px) scale(1.07) !important; box-shadow: 0 22px 50px rgba(47,111,237,0.55), 0 0 0 3px #2F6FED, inset 0 1px 0 rgba(255,255,255,0.8); z-index: 5; }
+
+
+  .about { border-radius: 18px; padding: 1.8rem; }
+  .about p { max-width: 62ch; }
+
+  /* gallery */
+  .gallery-wrap { padding: 1.3rem 3.2rem; position: relative; border-radius: 22px; }
+  .gallery-wrap::before { display: none; }
+  .gallery-viewport { overflow: hidden; width: 100%; perspective: 900px; padding: 2.2rem 0;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%); }
+  .gallery-track { display: flex; gap: 1rem; width: max-content; will-change: transform; transform-style: preserve-3d; }
+  .gallery-item { flex: 0 0 auto; width: 200px; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--border); padding: 0; background: rgba(255,255,255,0.15); cursor: none; position: relative;
+    box-shadow: 0 8px 22px var(--shadow); transition: transform 0.25s ease, box-shadow 0.25s ease; }
+  .gallery-item:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 16px 32px var(--shadow); }
+  .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  .gallery-item video { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  .gallery-item.is-video::after { content: "▶"; position: absolute; right: 0.55rem; bottom: 0.55rem; width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; padding-left: 2px;
+    background: rgba(8,20,50,0.55); border: 1px solid rgba(255,255,255,0.5); pointer-events: none; }
+  .gallery-wrap.single { padding: 1.3rem 1.5rem; }
+  .gallery-wrap.single .gallery-viewport { display: flex; justify-content: center; perspective: none; -webkit-mask-image: none; mask-image: none; padding: 1.4rem 0; }
+  .gallery-wrap.single .gallery-track { width: 100%; justify-content: center; }
+  .gallery-wrap.single .gallery-item { width: min(100%, 420px); aspect-ratio: 16 / 10; box-shadow: 0 14px 34px var(--shadow); }
+  .gallery-wrap.single .gallery-item:hover { transform: translateY(-3px); }
+  .gallery-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--glass-strong); backdrop-filter: blur(10px); color: var(--blue-deep);
+    font-size: 1.4rem; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: none;
+    box-shadow: 0 6px 18px var(--shadow); z-index: 3; transition: background 0.2s ease, transform 0.15s ease; }
+  .gallery-arrow:hover { background: rgba(255,255,255,0.85); }
+  .gallery-arrow:active { transform: translateY(-50%) scale(0.9); }
+  .gallery-arrow.prev { left: 0.6rem; } .gallery-arrow.next { right: 0.6rem; }
+
+  .gallery-arrow[hidden] { display: none; }
+  .gallery-viewport { transition: opacity 0.22s ease; }
+  .gallery-viewport.switching { opacity: 0; }
+  .gallery-filters { display: flex; flex-wrap: wrap; gap: 0.55rem; margin: 0 0 1.1rem; }
+  .gallery-filter { font-family: 'Inter', system-ui, sans-serif; font-size: 0.85rem; font-weight: 500; color: var(--blue-deep);
+    padding: 0.5rem 1.05rem; border-radius: 999px; background: var(--glass); border: 1px solid var(--border);
+    cursor: none;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, color 0.2s ease; }
+  .gallery-filter:hover { background: var(--glass-strong); transform: translateY(-2px); }
+  .gallery-filter.active { background: var(--blue-deep); color: #fff; border-color: var(--blue-deep); box-shadow: 0 8px 20px var(--shadow); }
+  .lightbox { position: fixed; inset: 0; z-index: 60; background: rgba(6,15,40,0.92); visibility: hidden;
+    display: flex; flex-direction: column; gap: 1rem; align-items: center; justify-content: center; padding: 2rem; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s; }
+  .lightbox video { display: none; max-width: min(92vw, 1100px); max-height: 82vh; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); background: #000; }
+  .lightbox.video video { display: block; }
+  .lightbox.video img { display: none; }
+  .lightbox-caption { color: #fff; font-family: 'Sora', 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.02em;
+    padding: 0.5rem 1.1rem; border-radius: 999px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.35); }
+  .lightbox-caption:empty { display: none; }
+  .lightbox.open { opacity: 1; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+  .lightbox img { max-width: min(92vw, 1100px); max-height: 86vh; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    transform: scale(0.92); transition: transform 0.25s ease; }
+  .lightbox.open img { transform: scale(1); }
+  .lightbox-close { position: fixed; top: max(1.2rem, env(safe-area-inset-top, 0px)); right: 1.2rem; width: 42px; height: 42px;
+    border-radius: 50%; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.15); color: #fff;
+    font-size: 1.5rem; line-height: 1; cursor: none; display: flex; align-items: center; justify-content: center; }
+  .lightbox-close:hover { background: rgba(255,255,255,0.3); }
+
+  .contact { border-radius: 20px; padding: 2.2rem; text-align: center; }
+  .contact p { color: var(--muted); max-width: 50ch; margin: 0.6rem auto 1.4rem; }
+
+  footer { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; color: var(--blue-deep); opacity: 0.85; font-size: 0.9rem; text-align: center; position: relative; z-index: 1; }
+  footer a { color: var(--blue-deep); text-decoration: underline; }
+
+  ::selection { background: var(--blue-deep); color: #fff; }
+  :focus-visible { outline: 2px solid var(--blue-deep); outline-offset: 2px; }
+  @media (max-width: 640px) {
+    .glass { backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); }
+    .nebula-clouds { animation: none; }
+    .nebula-clouds.layer2, .orb4, .orb5, .noise { display: none; }
+    .starfield { animation: none; }
+    nav.glass { flex-direction: column; align-items: flex-start; padding: 0.7rem 1rem; }
+    nav.glass.scrolled { padding: 0.5rem 1rem; }
+    nav a { margin-left: 0; margin-right: 1rem; font-size: 0.85rem; }
+    header { margin-top: 2.5rem; padding: 2.2rem 1.3rem; }
+    .gallery-wrap { padding: 1rem 2.8rem; }
+    .gallery-wrap.single { padding: 1rem; }
+    .contact { padding: 1.6rem 1.2rem; }
+    .about { padding: 1.4rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  @media (hover:none) { body { cursor: auto; } #cursor { display: none; } a, .btn { cursor: pointer; } }
+</style>
+</head>
+<body>
+
+<div class="noise"></div>
+<div id="progress"></div>
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
+
+<div class="nebula-clouds"></div>
+<div class="nebula-clouds layer2"></div>
+<div class="starfield"></div>
+<div class="orbwrap">
+  <div class="orb orb1" data-depth="0.6"></div>
+  <div class="orb orb2" data-depth="0.9"></div>
+  <div class="orb orb3" data-depth="0.4"></div>
+  <div class="orb orb4" data-depth="0.75"></div>
+  <div class="orb orb5" data-depth="1.1"></div>
+</div>
+
+<nav class="glass">
+  <span class="brand">ZariDev</span>
+  <div>
+    <a href="#services">Services</a>
+    <a href="#skills">Compétences</a>
+    <a href="#gallery">Galerie</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<header class="glass reveal">
+ <div id="hero-inner">
+  <div class="tag">Développeur Roblox</div>
+  <h1>Zari</h1>
+  <p class="role">3D / Blender · Mapper · VFX · GFX · UI · Luau · UGC</p>
+  <p class="pitch">Zari, 17 ans. Autodidacte, curieux, ambitieux et créatif, j’aime apprendre par moi-même, expérimenter et donner forme à mes idées.</p>
+  <div class="links">
+    <a class="btn" href="#contact" data-social="roblox">Roblox Profil</a>
+    <a class="btn" href="#contact" data-social="gunslol">Guns.lol</a>
+    <a class="btn" href="#contact" data-social="tiktok">Tiktok</a>
+    <a class="btn" href="#contact" data-social="discord">Discord</a>
+  </div>
+ </div>
+</header>
+
+<main>
+  <section id="about" class="about glass reveal">
+    <h2>À propos</h2>
+    <p>Je suis Zari, j'ai 17 ans et je suis développeur généraliste sur Roblox. Autodidacte, j'ai appris en expérimentant directement dans Roblox Studio et Blender plutôt qu'en suivant des cours classiques — c'est cette curiosité qui m'a poussé à toucher à un peu tout : la modélisation 3D, la conception d'environnements, les effets visuels, le graphisme et le design d'interface. Je suis aujourd'hui en train d'apprendre le Luau pour pouvoir scripter mes propres systèmes de A à Z. Ce qui me distingue, c'est cette polyvalence : je peux prendre en charge la partie visuelle d'un projet dans son ensemble, du concept à l'exécution, sans dépendre uniquement d'un seul domaine.</p>
+  </section>
+
+  <section id="services">
+    <h2 class="reveal">Ce que je fais</h2>
+    <p class="sub reveal">Les catégories sur lesquelles tu peux intervenir.</p>
+    <div class="services">
+      <div class="service glass reveal tilt" data-goto="skill-blender"><div class="ic">🧊</div><h3>3D / Blender</h3><p>Modélisation et assets 3D détaillés.</p></div>
+      <div class="service glass reveal tilt" data-goto="skill-mapper"><div class="ic">🗺️</div><h3>Mapper</h3><p>Conception d'environnements.</p></div>
+      <div class="service glass reveal tilt" data-goto="skill-vfx"><div class="ic">✨</div><h3>VFX</h3><p>Effets visuels, aura, ambiances.</p></div>
+      <div class="service glass reveal tilt" data-goto="skill-gfx"><div class="ic">🖌️</div><h3>GFX</h3><p>Visuels graphiques, bannière, logos.</p></div>
+      <div class="service glass reveal tilt" data-goto="skill-ui"><div class="ic">🎛️</div><h3>UI</h3><p>Design d'interfaces (hors intégration pour l'instant).</p></div>
+      <div class="service glass reveal tilt" data-goto="skill-luau"><div class="ic">💻</div><h3>Luau</h3><p>Scripting — en cours d'apprentissage.</p></div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <h2 class="reveal">Compétences</h2>
+    <p class="sub reveal">Clique une catégorie ci-dessus pour la retrouver ici.</p>
+    <div class="skillsgrid">
+      <div class="skillcard glass reveal tilt" id="skill-blender" data-skill="blender">
+        <svg class="ring" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="36"/><circle class="ring-fill" data-level="95" cx="40" cy="40" r="36"/></svg>
+        <div class="pct">95%</div><div class="lbl">3D / Blender</div>
+      </div>
+      <div class="skillcard glass reveal tilt" id="skill-gfx" data-skill="gfx">
+        <svg class="ring" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="36"/><circle class="ring-fill" data-level="95" cx="40" cy="40" r="36"/></svg>
+        <div class="pct">95%</div><div class="lbl">GFX</div>
+      </div>
+      <div class="skillcard glass reveal tilt" id="skill-mapper" data-skill="mapper">
+        <svg class="ring" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="36"/><circle class="ring-fill" data-level="80" cx="40" cy="40" r="36"/></svg>
+        <div class="pct">80%</div><div class="lbl">Mapper</div>
+      </div>
+      <div class="skillcard glass reveal tilt" id="skill-ui" data-skill="ui">
+        <svg class="ring" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="36"/><circle class="ring-fill" data-level="80" cx="40" cy="40" r="36"/></svg>
+        <div class="pct">80%</div><div class="lbl">UI (design)</div>
+      </div>
+      <div class="skillcard glass reveal tilt" id="skill-vfx" data-skill="vfx">
+        <svg class="ring" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="36"/><circle class="ring-fill" data-level="70" cx="40" cy="40" r="36"/></svg>
+        <div class="pct">70%</div><div class="lbl">VFX</div>
+      </div>
+      <div class="skillcard glass reveal tilt" id="skill-luau" data-skill="luau">
+        <svg class="ring" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="36"/><circle class="ring-fill" data-level="20" cx="40" cy="40" r="36"/></svg>
+        <div class="pct">20%</div><div class="lbl">Luau (apprentissage)</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <h2 class="reveal">Galerie</h2>
+    <p class="sub reveal">Mes créations, cliquables en grand.</p>
+    <div class="gallery-filters reveal" id="galleryFilters"></div>
+    <div class="gallery-wrap glass reveal">
+      <button class="gallery-arrow prev" aria-label="Image précédente">‹</button>
+      <div class="gallery-viewport">
+        <div class="gallery-track"></div>
+      </div>
+      <button class="gallery-arrow next" aria-label="Image suivante">›</button>
+    </div>
+  </section>
+
+  <section id="contact" class="contact glass reveal">
+    <h2>Discutons</h2>
+    <p>Dispo pour des collaborations ou des projets ponctuels. Le plus simple pour me joindre :</p>
+    <div class="links" style="justify-content:center">
+      <a class="btn" id="link-roblox" href="#" target="_blank" rel="noopener">Roblox Profil</a>
+      <a class="btn" id="link-gunslol" href="#" target="_blank" rel="noopener">Guns.lol</a>
+      <a class="btn" id="link-tiktok" href="#" target="_blank" rel="noopener">Tiktok</a>
+      <a class="btn" id="link-discord" href="#" target="_blank" rel="noopener">Discord</a>
+      <a class="btn" id="link-email" href="#" target="_blank" rel="noopener">Email</a>
+    </div>
+  </section>
+</main>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Fermer">×</button>
+  <img id="lightboxImg" src="" alt="Création en grand">
+  <video id="lightboxVideo" controls playsinline></video>
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+</div>
+
+<footer>© Zari — Portfolio</footer>
+
+<script src="creations.js"></script>
+<script>
+  // ---- MODIFIE ICI tes vrais liens : ils remplissent automatiquement tous les boutons ----
+  const LINKS = {
+    roblox: 'https://www.roblox.com/fr/users/2235875771/profile',
+    gunslol: 'https://guns.lol/0zari',
+    tiktok: 'https://www.tiktok.com/@zari.dev',
+    discord: 'https://discord.gg/ukxrg72e2',
+    email: 'mailto:zaridevcontact@gmail.com'
+  };
+  Object.entries(LINKS).forEach(([key, url]) => {
+    const el = document.getElementById('link-' + key);
+    if (el) {
+      el.href = url;
+      if (key === 'email') el.removeAttribute('target');
+    }
+  });
+
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  // stagger delay for items inside the same grid/list
+  ['.stats', '.services', '.projects'].forEach(sel => {
+    document.querySelectorAll(sel + ' > .reveal').forEach((el, i) => { el.style.transitionDelay = (i * 90) + 'ms'; });
+  });
+  document.querySelectorAll('.skillrow').forEach((el, i) => { el.style.transitionDelay = (i * 90) + 'ms'; });
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      e.target.classList.toggle('visible', e.isIntersecting);
+      if (!e.isIntersecting) { e.target.classList.remove('settled'); }
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.fill').forEach(f => f.style.width = f.dataset.level + '%');
+        e.target.querySelectorAll('.ring-fill').forEach(r => {
+          const lvl = parseFloat(r.dataset.level);
+          r.style.strokeDashoffset = 226 - (226 * lvl / 100);
+        });
+        const c = e.target.querySelector('.num');
+        if (c) {
+          const target = parseInt(c.dataset.count, 10);
+          let cur = 0;
+          const step = () => { cur += Math.max(1, target/40); if (cur < target) { c.textContent = Math.floor(cur); requestAnimationFrame(step); } else c.textContent = target; };
+          step();
+        }
+      } else {
+        e.target.querySelectorAll('.fill').forEach(f => f.style.width = '0%');
+        e.target.querySelectorAll('.ring-fill').forEach(r => { r.style.strokeDashoffset = 226; });
+      }
+    });
+  }, { threshold: 0.2 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  document.querySelectorAll('.reveal').forEach(el => {
+    el.addEventListener('animationend', (ev) => {
+      if (ev.animationName && ev.animationName.indexOf('revealIn') === 0) {
+        el.classList.add('settled');
+      }
+    });
+  });
+
+  // click a service card -> scroll to matching skill and highlight it
+  document.querySelectorAll('.service[data-goto]').forEach(card => {
+    card.addEventListener('click', () => {
+      const target = document.getElementById(card.dataset.goto);
+      if (!target) return;
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const siblings = document.querySelectorAll('.skillcard');
+      siblings.forEach(s => { if (s !== target) s.classList.add('dimmed'); });
+      target.classList.add('spotlight');
+      setTimeout(() => {
+        target.classList.remove('spotlight');
+        siblings.forEach(s => s.classList.remove('dimmed'));
+      }, 5000);
+    });
+  });
+
+  // ---- Galerie : défilement infini + flèches avec effet de rotation + zoom en grand ----
+  (function initGallery() {
+    const wrap = document.querySelector('.gallery-wrap');
+    if (!wrap) return;
+    const DATA = (typeof CREATIONS !== 'undefined' && Array.isArray(CREATIONS)) ? CREATIONS : [];
+    const DOSSIER = (typeof DOSSIER_MEDIA !== 'undefined') ? DOSSIER_MEDIA : 'media/';
+    if (!DATA.length) { const sec = document.getElementById('gallery'); if (sec) sec.hidden = true; return; }
+
+    const track = wrap.querySelector('.gallery-track');
+    const viewport = wrap.querySelector('.gallery-viewport');
+    const prevBtn = wrap.querySelector('.gallery-arrow.prev');
+    const nextBtn = wrap.querySelector('.gallery-arrow.next');
+    const filtersEl = document.getElementById('galleryFilters');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxCaption = document.getElementById('lightboxCaption');
+    const lightboxVideo = document.getElementById('lightboxVideo');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const isVideo = (f) => /\.(mp4|webm|mov)$/i.test(f);
+    const baseName = (f) => f.replace(/\.[^.]+$/, '');
+    const hasCat = (it, k) => (it.dataset.cat || '').split(/\s+/).indexOf(k) !== -1;
+
+    // Une vignette par ligne de creations.js (les petites versions sont dans media/mini/)
+    const sourceItems = DATA.map((d, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'gallery-item' + (isVideo(d.fichier) ? ' is-video' : '');
+      b.dataset.i = i; b.dataset.cat = d.categorie || ''; b.dataset.tool = d.outil || '';
+      b.setAttribute('aria-label', 'Agrandir : ' + (d.titre || d.fichier));
+      if (isVideo(d.fichier)) {
+        const v = document.createElement('video');
+        v.poster = DOSSIER + 'mini/' + baseName(d.fichier) + '.jpg';
+        v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('loop', '');
+        v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'none';
+        b.appendChild(v);
+      } else {
+        const img = document.createElement('img');
+        img.src = DOSSIER + 'mini/' + d.fichier;
+        img.alt = d.titre || ('Création réalisée sur ' + (d.outil || ''));
+        img.decoding = 'async';
+        b.appendChild(img);
+      }
+      return b;
+    });
+
+    // ---- zoom (lightbox) ----
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      lightboxImg.src = '';
+      lightboxVideo.pause(); lightboxVideo.removeAttribute('src'); lightboxVideo.load();
+    }
+    track.addEventListener('click', (e) => {
+      const item = e.target.closest('.gallery-item');
+      if (!item) return;
+      const d = DATA[+item.dataset.i];
+      if (!d) return;
+      if (isVideo(d.fichier)) {
+        lightbox.classList.add('video');
+        lightboxVideo.src = DOSSIER + d.fichier;
+        lightboxVideo.play().catch(() => {});
+      } else {
+        lightbox.classList.remove('video');
+        lightboxImg.src = DOSSIER + d.fichier;
+      }
+      lightboxCaption.textContent = d.outil ? 'Réalisé sur ' + d.outil : '';
+      lightbox.classList.add('open');
+    });
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+    // ---- aperçus vidéo : on ne lit que ceux qu'on voit à l'écran (ordi et mobile) ----
+    const videoIO = reduceMotion ? null : new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        const v = en.target;
+        if (en.isIntersecting) {
+          if (!v.getAttribute('src')) {
+            const d = DATA[+v.closest('.gallery-item').dataset.i];
+            v.src = DOSSIER + 'mini/' + baseName(d.fichier) + '.mp4';
+          }
+          v.muted = true;
+          v.play().catch(() => {});
+        } else { v.pause(); }
+      });
+    }, { threshold: 0.2 });
+
+    // ---- mouvement : défilement auto + flèches sur une seule position ----
+    const CATS = [['all', 'Tout'], ['3d', '3D / Blender'], ['mapper', 'Mapper'], ['vfx', 'VFX'], ['gfx', 'GFX'], ['ui', 'UI'], ['luau', 'Luau'], ['ugc', 'UGC']];
+    let running = false, listCount = 0, setWidth = 0, itemStep = 216, x = 0, kick = 0, paused = false, inView = true;
+    const SPEED = reduceMotion ? 0 : 0.4; // défilement auto (droite -> gauche)
+    new IntersectionObserver((es) => { inView = es[0].isIntersecting; }, { rootMargin: '150px' }).observe(wrap);
+
+    let lastW = window.innerWidth;
+    function measure() {
+      if (!running) return;
+      // distances prises dans la mise en page : la rotation 3D ne peut pas les fausser
+      const kids = track.children;
+      setWidth = kids[listCount].offsetLeft - kids[0].offsetLeft;
+      itemStep = kids[1].offsetLeft - kids[0].offsetLeft;
+    }
+    // sur téléphone, "resize" se déclenche quand la barre d'adresse bouge : on ne recalcule que si la largeur change
+    window.addEventListener('resize', () => { if (window.innerWidth !== lastW) { lastW = window.innerWidth; measure(); } });
+
+    function render(cat) {
+      const list = cat === 'all' ? sourceItems : sourceItems.filter(it => hasCat(it, cat));
+      if (videoIO) videoIO.disconnect();
+      track.innerHTML = '';
+      listCount = list.length;
+      kick = 0;
+      if (list.length <= 1) {
+        // une seule photo : pas de boucle, pas de flèches, pas d'animation
+        running = false;
+        wrap.classList.add('single');
+        prevBtn.hidden = true; nextBtn.hidden = true;
+        list.forEach(it => track.appendChild(it.cloneNode(true)));
+        track.style.transform = ''; track.style.transformOrigin = '';
+      } else {
+        wrap.classList.remove('single');
+        prevBtn.hidden = false; nextBtn.hidden = false;
+        for (let c = 0; c < 4; c++) list.forEach(it => track.appendChild(it.cloneNode(true)));
+        running = true;
+        measure();
+        x = -setWidth; // on démarre sur la 2e copie pour pouvoir aller dans les deux sens
+      }
+      if (videoIO) track.querySelectorAll('video').forEach(v => { v.muted = true; videoIO.observe(v); });
+    }
+
+    function frame() {
+      if (running && inView && setWidth > 0) {
+        let dx = paused ? 0 : -SPEED;
+        if (Math.abs(kick) > 0.5) { const move = kick * 0.12; kick -= move; dx -= move; } else { kick = 0; }
+        if (dx !== 0 || kick !== 0) {
+          x += dx;
+          // les copies sont identiques : on recale sans que ça se voie
+          while (x <= -2 * setWidth) x += setWidth;
+          while (x > -setWidth) x -= setWidth;
+          const rot = Math.max(-14, Math.min(14, -(kick / itemStep) * 10)); // rotation 3D pendant le mouvement
+          track.style.transformOrigin = `${-x + viewport.clientWidth / 2}px 50%`;
+          track.style.transform = `translateX(${x}px) rotateY(${rot}deg)`;
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    // pause seulement quand on survole les photos à la souris (au toucher, ça bloquerait le défilement)
+    viewport.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') paused = true; });
+    viewport.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') paused = false; });
+    prevBtn.addEventListener('click', () => { kick -= itemStep; });
+    nextBtn.addEventListener('click', () => { kick += itemStep; });
+
+    // ---- boutons de filtre (les catégories vides n'apparaissent pas) ----
+    let currentCat = 'all';
+    const available = CATS.filter(([k]) => k === 'all' || sourceItems.some(it => hasCat(it, k)));
+    if (filtersEl) {
+      if (available.length <= 1) { filtersEl.hidden = true; }
+      available.forEach(([k, label]) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'gallery-filter' + (k === 'all' ? ' active' : '');
+        b.textContent = label;
+        b.addEventListener('click', () => {
+          if (k === currentCat) return;
+          currentCat = k;
+          filtersEl.querySelectorAll('.gallery-filter').forEach(x2 => x2.classList.toggle('active', x2 === b));
+          viewport.classList.add('switching');
+          setTimeout(() => { render(k); viewport.classList.remove('switching'); }, 220);
+        });
+        filtersEl.appendChild(b);
+      });
+    }
+
+    render('all');
+  })();
+
+  // ---- scroll : barre de progression + parallaxe du haut de page (1 mise à jour par image, pas par événement) ----
+  const progress = document.getElementById('progress');
+  const heroInner = document.getElementById('hero-inner');
+  const navEl = document.querySelector('nav.glass');
+  let scrollRaf = 0, heroDone = false;
+  function onScroll() {
+    scrollRaf = 0;
+    const sy = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.transform = `scaleX(${max > 0 ? sy / max : 0})`;
+    navEl.classList.toggle('scrolled', sy > 40);
+    if (sy < 700) {
+      heroDone = false;
+      heroInner.style.transform = `translateY(${sy * 0.18}px)`;
+      heroInner.style.opacity = Math.max(0, 1 - sy / 500);
+    } else if (!heroDone) {
+      heroDone = true;
+      heroInner.style.opacity = 0;
+    }
+  }
+  window.addEventListener('scroll', () => { if (!scrollRaf) scrollRaf = requestAnimationFrame(onScroll); }, { passive: true });
+  onScroll();
+
+  // effets de survol (souris uniquement : inutiles et coûteux sur téléphone)
+  if (canHover) {
+    document.querySelectorAll('.glass').forEach(el => {
+      let raf = 0, lastE = null;
+      el.addEventListener('mousemove', (e) => {
+        lastE = e;
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          if (!lastE) return;
+          const r = el.getBoundingClientRect();
+          const px = (lastE.clientX - r.left) / r.width, py = (lastE.clientY - r.top) / r.height;
+          el.style.setProperty('--mx', (px*100)+'%'); el.style.setProperty('--my', (py*100)+'%');
+          if (el.classList.contains('tilt')) {
+            el.style.transform = `perspective(700px) rotateX(${(0.5-py)*10}deg) rotateY(${(px-0.5)*10}deg) translateY(-3px)`;
+          }
+        });
+      });
+      el.addEventListener('mouseleave', () => {
+        lastE = null;
+        if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        if (el.classList.contains('tilt')) el.style.transform = '';
+      });
+    });
+  }
+
+  document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const r = btn.getBoundingClientRect(); const d = Math.max(r.width, r.height);
+      const s = document.createElement('span'); s.className = 'ripple';
+      s.style.width = s.style.height = d+'px'; s.style.left = (e.clientX-r.left-d/2)+'px'; s.style.top = (e.clientY-r.top-d/2)+'px';
+      btn.appendChild(s); setTimeout(() => s.remove(), 600);
+    });
+    if (canHover) {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        btn.style.transform = `translate(${(e.clientX-r.left-r.width/2)*0.25}px, ${(e.clientY-r.top-r.height/2)*0.25}px)`;
+      });
+      btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+    }
+  });
+
+  // fond : les orbes bougent seulement quand on bouge la souris ou qu'on scrolle
+  const orbs = Array.from(document.querySelectorAll('.orb')).map(o => ({ el: o, depth: parseFloat(o.dataset.depth) }));
+  let mx = 0, my = 0, orbRaf = 0;
+  function updateOrbs() {
+    orbRaf = 0;
+    const sy = window.scrollY;
+    orbs.forEach(({ el, depth }) => {
+      el.style.transform = `translate3d(${mx*40*depth}px, ${my*40*depth - sy*0.12*depth}px, 0)`;
+    });
+  }
+  function queueOrbs() { if (!orbRaf) orbRaf = requestAnimationFrame(updateOrbs); }
+  if (canHover) window.addEventListener('mousemove', (e) => { mx = e.clientX / window.innerWidth - 0.5; my = e.clientY / window.innerHeight - 0.5; queueOrbs(); }, { passive: true });
+  window.addEventListener('scroll', queueOrbs, { passive: true });
+  queueOrbs();
+
+  // curseur personnalisé : seulement sur ordinateur, et ne tourne que quand il bouge
+  const cursor = document.getElementById('cursor');
+  if (canHover) {
+    let cx = window.innerWidth / 2, cy = window.innerHeight / 2, tx = cx, ty = cy, curRaf = 0;
+    const moveCursor = () => {
+      cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22;
+      cursor.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
+      curRaf = (Math.abs(tx - cx) > 0.1 || Math.abs(ty - cy) > 0.1) ? requestAnimationFrame(moveCursor) : 0;
+    };
+    window.addEventListener('mousemove', (e) => { tx = e.clientX; ty = e.clientY; if (!curRaf) curRaf = requestAnimationFrame(moveCursor); }, { passive: true });
+    moveCursor();
+    document.querySelectorAll('a, .btn, .glass').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+    });
+  } else {
+    cursor.style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
