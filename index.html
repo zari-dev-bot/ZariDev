@@ -284,6 +284,7 @@
     .contact { padding: 1.6rem 1.2rem; }
     .about { padding: 1.4rem; }
   }
+  .scrolling .nebula-clouds, .scrolling .starfield { animation-play-state: paused; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 </head>
@@ -638,6 +639,7 @@
       if (videoIO) track.querySelectorAll('video').forEach(v => { v.muted = true; videoIO.observe(v); });
     }
 
+    let lastRot = 0;
     function frame() {
       if (running && inView && setWidth > 0) {
         let dx = paused ? 0 : -SPEED;
@@ -648,8 +650,9 @@
           while (x <= -2 * setWidth) x += setWidth;
           while (x > -setWidth) x -= setWidth;
           const rot = Math.max(-14, Math.min(14, -(kick / itemStep) * 10)); // rotation 3D pendant le mouvement
-          track.style.transformOrigin = `${-x + viewport.clientWidth / 2}px 50%`;
-          track.style.transform = `translateX(${x}px) rotateY(${rot}deg)`;
+          if (rot !== 0 || lastRot !== 0) track.style.transformOrigin = `${-x + viewport.clientWidth / 2}px 50%`;
+          track.style.transform = rot === 0 ? `translate3d(${x}px, 0, 0)` : `translateX(${x}px) rotateY(${rot}deg)`;
+          lastRot = rot;
         }
       }
       requestAnimationFrame(frame);
@@ -689,29 +692,38 @@
   // ---- scroll : barre de progression + parallaxe du haut de page (1 mise à jour par image, pas par événement) ----
   const reduceMotionPx = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pxGroups = Array.from(document.querySelectorAll('.services, .skillsgrid')).map(g => ({
-    g, cards: Array.from(g.children).map((el, i) => { el.classList.add('layered'); return { el, s: i % 2 ? 0.07 : 0.03 }; })
+    g, top: 0, h: 0,
+    cards: Array.from(g.children).map((el, i) => { el.classList.add('layered'); return { el, s: i % 2 ? 0.07 : 0.03, cy: 0, ty: null, sy: null }; })
   }));
+  // position dans la page (ignore les transformations) : mesurée seulement au chargement / redimensionnement,
+  // plus de getBoundingClientRect sur 12 cartes à chaque image du scroll
+  const docTop = (el) => { let y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; };
+  function measureParallax() {
+    pxGroups.forEach(grp => {
+      grp.top = docTop(grp.g); grp.h = grp.g.offsetHeight;
+      grp.cards.forEach(c => { c.cy = docTop(c.el) + c.el.offsetHeight / 2; });
+    });
+    updateCardParallax();
+  }
   function updateCardParallax() {
     if (reduceMotionPx) return;
-    const vh = window.innerHeight;
-    const todo = [];
-    // 1) on lit toutes les positions, 2) on écrit ensuite (évite de recalculer la page à chaque carte)
-    pxGroups.forEach(({ g, cards }) => {
-      const r = g.getBoundingClientRect();
-      if (r.bottom < -300 || r.top > vh + 300) return;
-      const off = Math.max(-400, Math.min(400, r.top + r.height / 2 - vh / 2));
-      cards.forEach(({ el, s }) => {
-        const cr = el.getBoundingClientRect();
-        const sy = Math.max(-1, Math.min(1, (cr.top + cr.height / 2 - vh / 2) / (vh / 2)));
-        todo.push([el, off * s, sy]);
+    const vh = window.innerHeight, sc = window.scrollY;
+    pxGroups.forEach(grp => {
+      const gTop = grp.top - sc;
+      if (gTop + grp.h < -300 || gTop > vh + 300) return;
+      const off = Math.max(-400, Math.min(400, gTop + grp.h / 2 - vh / 2));
+      grp.cards.forEach(c => {
+        const ty = +(off * c.s).toFixed(1);
+        const sy = +Math.max(-1, Math.min(1, (c.cy - sc - vh / 2) / (vh / 2))).toFixed(3);
+        if (ty !== c.ty) { c.el.style.translate = `0 ${ty}px`; c.ty = ty; }   // la carte dérive à sa vitesse
+        if (sy !== c.sy) { c.el.style.setProperty('--sy', sy); c.sy = sy; }  // le texte/l'icône dedans glissent à une autre vitesse
       });
     });
-    todo.forEach(([el, ty, sy]) => {
-      el.style.translate = `0 ${ty.toFixed(1)}px`;   // la carte dérive à sa vitesse
-      el.style.setProperty('--sy', sy.toFixed(3));    // le texte/l'icône dedans glissent à une autre vitesse
-    });
   }
-  window.addEventListener('resize', updateCardParallax);
+  measureParallax();
+  window.addEventListener('resize', measureParallax);
+  window.addEventListener('load', measureParallax);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureParallax);
 
   const progress = document.getElementById('progress');
   const heroInner = document.getElementById('hero-inner');
@@ -733,7 +745,13 @@
       heroInner.style.opacity = 0;
     }
   }
-  window.addEventListener('scroll', () => { if (!scrollRaf) scrollRaf = requestAnimationFrame(onScroll); }, { passive: true });
+  let scrollTimer = 0;
+  window.addEventListener('scroll', () => {
+    if (!scrollRaf) scrollRaf = requestAnimationFrame(onScroll);
+    document.documentElement.classList.add('scrolling');
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => document.documentElement.classList.remove('scrolling'), 140);
+  }, { passive: true });
   onScroll();
 
   // effets de survol (souris uniquement : inutiles et coûteux sur téléphone)
