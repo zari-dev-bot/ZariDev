@@ -29,5 +29,5 @@ const CREATIONS = [
   { fichier: "video-vfx-3.mp4", categorie: "vfx", outil: "Roblox Studio", titre: "Vidéo VFX 3" },
   { fichier: "epee-zari.jpg", categorie: "ugc", outil: "Blender", titre: "Épée Zari" },
   { fichier: "bouton-faire-un-don.webp", categorie: "ui", outil: "After Effects", titre: "Bouton « Faire un don », UI" },
-  { fichier; "AuraDragon.mp6", categorie; "vfx", outil; "Roblox Studio", titre "Aura Dragon" },
+  { fichier; "AuraDragon.mp4", categorie; "vfx", outil; "Roblox Studio", titre "Aura Dragon" },
 ];
