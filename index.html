@@ -213,6 +213,8 @@
   @keyframes tileIn { from { opacity: 0; } to { opacity: 1; } }
   .gtile:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 16px 32px var(--shadow); }
   .gtile img, .gtile video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  .gtile video { opacity: 0; transition: opacity 0.25s ease; }
+  .gtile video.ready { opacity: 1; }
   .gtile.is-video::after { content: "\25B6\FE0E"; position: absolute; right: 0.55rem; bottom: 0.55rem; width: 28px; height: 28px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; padding-left: 2px; z-index: 2;
     background: rgba(8,20,50,0.55); border: 1px solid rgba(255,255,255,0.5); pointer-events: none; }
@@ -513,6 +515,22 @@
     const baseName = (f) => f.replace(/\.[^.]+$/, '');
     const hasCat = (d, k) => (d.categorie || '').split(/\s+/).indexOf(k) !== -1;
 
+    // vidéos : la vignette montre le MILIEU de la vidéo. La mini vidéo n'est chargée que quand la vignette arrive à l'écran
+    // (la photo .jpg sert de remplacement en attendant, ou si la mini vidéo est introuvable)
+    const middle = (v) => { if (isFinite(v.duration) && v.duration > 0) v.currentTime = v.duration / 2; };
+    const vio = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        vio.unobserve(en.target);
+        const v = document.createElement('video');
+        v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata';
+        v.addEventListener('loadedmetadata', () => middle(v), { once: true });
+        v.addEventListener('seeked', () => v.classList.add('ready'), { once: true });
+        v.src = DOSSIER + 'mini/' + baseName(DATA[+en.target.dataset.i].fichier) + '.mp4';
+        en.target.appendChild(v);
+      });
+    }, { rootMargin: '200px' });
+
     function tile(i, n) {
       const d = DATA[i];
       const b = document.createElement('button');
@@ -525,6 +543,7 @@
       img.alt = d.titre || ('Création réalisée sur ' + (d.outil || ''));
       img.src = DOSSIER + 'mini/' + (isVideo(d.fichier) ? baseName(d.fichier) + '.jpg' : d.fichier);
       b.appendChild(img);
+      if (isVideo(d.fichier)) vio.observe(b);
       return b;
     }
     // on n'ajoute que 12 vignettes à la fois : la page reste légère même avec des centaines de créations
@@ -539,7 +558,7 @@
     }
     function reset() {
       view = DATA.map((d, i) => i).filter(i => cat === 'all' || hasCat(DATA[i], cat));
-      grid.replaceChildren(); shown = 0; addMore();
+      vio.disconnect(); grid.replaceChildren(); shown = 0; addMore();
     }
     more.addEventListener('click', addMore);
 
@@ -561,22 +580,19 @@
       filtersEl.appendChild(b);
     });
 
-    // ---- aperçu vidéo au survol (souris uniquement) : le fichier n'est chargé qu'à ce moment-là ----
-    let preview = null;
-    const stopPreview = () => { if (preview) { preview.remove(); preview = null; } };
+    // ---- aperçu vidéo au survol (souris uniquement) : on lance la vidéo de la vignette, elle revient sur le milieu en sortant ----
     if (canHover) {
       grid.addEventListener('mouseover', (e) => {
         const t = e.target.closest('.gtile.is-video');
         if (!t || t.contains(e.relatedTarget)) return;
-        stopPreview();
-        const v = document.createElement('video');
-        v.src = DOSSIER + 'mini/' + baseName(DATA[+t.dataset.i].fichier) + '.mp4';
-        v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
-        t.appendChild(v); preview = v;
+        const v = t.querySelector('video');
+        if (v && v.classList.contains('ready')) v.play().catch(() => {});
       });
       grid.addEventListener('mouseout', (e) => {
         const t = e.target.closest('.gtile.is-video');
-        if (t && !t.contains(e.relatedTarget)) stopPreview();
+        if (!t || t.contains(e.relatedTarget)) return;
+        const v = t.querySelector('video');
+        if (v) { v.pause(); middle(v); }
       });
     }
 
@@ -606,7 +622,8 @@
     grid.addEventListener('click', (e) => {
       const t = e.target.closest('.gtile');
       if (!t) return;
-      stopPreview();
+      const pv = t.querySelector('video');
+      if (pv) pv.pause();
       show(view.indexOf(+t.dataset.i));
     });
     lbPrev.addEventListener('click', () => show(pos - 1));
