@@ -30,5 +30,5 @@ const CREATIONS = [
   { fichier: "epee-zari.jpg", categorie: "ugc", outil: "Blender", titre: "Épée Zari" },
   { fichier: "bouton-faire-un-don.webp", categorie: "ui", outil: "After Effects", titre: "Bouton « Faire un don », UI" },
   { fichier: "AuraDragon.mp4", categorie: "vfx", outil: "Roblox Studio", titre: "Aura Dragon" },
-  { fichier: 'ui moneygemmeshuile.png" categirie: "ui", outil "Figma", titre: "Ui Carburant/Money" },
+  { fichier: "ui moneygemmeshuile.png", categirie: "ui", outil "Figma", titre: "Ui Carburant/Money" },
 ];
