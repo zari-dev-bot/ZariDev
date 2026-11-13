@@ -213,8 +213,6 @@
   @keyframes tileIn { from { opacity: 0; } to { opacity: 1; } }
   .gtile:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 16px 32px var(--shadow); }
   .gtile img, .gtile video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
-  .gtile video { opacity: 0; transition: opacity 0.25s ease; }
-  .gtile video.ready { opacity: 1; }
   .gtile.is-video::after { content: "\25B6\FE0E"; position: absolute; right: 0.55rem; bottom: 0.55rem; width: 28px; height: 28px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; padding-left: 2px; z-index: 2;
     background: rgba(8,20,50,0.55); border: 1px solid rgba(255,255,255,0.5); pointer-events: none; }
@@ -222,16 +220,16 @@
   .gallery-foot span { color: var(--muted); font-size: 0.9rem; }
   #galleryMore { position: relative; overflow: hidden; font-family: inherit; }
   .lightbox { position: fixed; inset: 0; z-index: 60; background: rgba(6,15,40,0.92); visibility: hidden;
-    display: flex; flex-direction: column; gap: 1rem; align-items: center; justify-content: center; padding: 2rem; opacity: 0; pointer-events: none;
+    display: flex; flex-direction: column; gap: 1rem; align-items: center; justify-content: center; padding: 4rem 4.5rem 3.5rem; overflow: hidden; opacity: 0; pointer-events: none;
     transition: opacity 0.25s ease, visibility 0s linear 0.25s; }
-  .lightbox video { display: none; max-width: min(92vw, 1100px); max-height: 82vh; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); background: #000; }
+  .lightbox video { display: none; min-width: 0; max-width: 100%; max-height: calc(100vh - 8.5rem); max-height: calc(100dvh - 8.5rem); object-fit: contain; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); background: #000; }
   .lightbox.video video { display: block; }
   .lightbox.video img { display: none; }
   .lightbox-caption { color: #fff; font-family: 'Sora', 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.02em;
     padding: 0.5rem 1.1rem; border-radius: 999px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.35); }
   .lightbox-caption:empty { display: none; }
   .lightbox.open { opacity: 1; pointer-events: auto; visibility: visible; transition-delay: 0s; }
-  .lightbox img { max-width: min(92vw, 1100px); max-height: 82vh; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+  .lightbox img { min-width: 0; max-width: 100%; max-height: calc(100vh - 8.5rem); max-height: calc(100dvh - 8.5rem); object-fit: contain; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
   .lightbox-close, .lb-nav { border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.15); color: #fff; line-height: 1;
     display: flex; align-items: center; justify-content: center; }
   .lightbox-close { position: fixed; top: max(1.2rem, env(safe-area-inset-top, 0px)); right: 1.2rem; width: 42px; height: 42px; border-radius: 50%; font-size: 1.5rem; }
@@ -267,6 +265,7 @@
     nav a { margin-left: 0; margin-right: 1rem; font-size: 0.85rem; }
     header { margin-top: 2.5rem; padding: 2.2rem 1.3rem; }
     .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.7rem; }
+    .lightbox { padding: 4rem 0.75rem 4.5rem; }
     .contact { padding: 1.6rem 1.2rem; }
     .about { padding: 1.4rem; }
   }
@@ -492,7 +491,7 @@
     });
   });
 
-  // ---- Galerie : grille filtrable, chargement progressif, vidéo au survol, zoom avec flèches ----
+  // ---- Galerie : grille filtrable, chargement progressif, zoom avec flèches ----
   (async function initGallery() {
     const sec = document.getElementById('gallery');
     // la liste (media/galerie.json) est préparée automatiquement par GitHub à chaque mise en ligne
@@ -518,38 +517,32 @@
 
     const isVideo = (f) => /\.(mp4|webm|mov)$/i.test(f);
     const baseName = (f) => f.replace(/\.[^.]+$/, '');
-    const hasCat = (d, k) => (d.categorie || '').split(/\s+/).indexOf(k) !== -1;
+    const keyOf = (d) => (d.categorie || '').trim().toLowerCase();
+    const hasCat = (d, k) => keyOf(d) === k;
 
-    // vidéos : la vignette montre le MILIEU de la vidéo. La mini vidéo n'est chargée que quand la vignette arrive à l'écran
-    // (la photo .jpg sert de remplacement en attendant, ou si la mini vidéo est introuvable)
-    const middle = (v) => { if (isFinite(v.duration) && v.duration > 0) v.currentTime = v.duration / 2; };
-    const vio = new IntersectionObserver((entries) => {
-      entries.forEach(en => {
-        if (!en.isIntersecting) return;
-        vio.unobserve(en.target);
-        const v = document.createElement('video');
-        v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata';
-        v.addEventListener('loadedmetadata', () => middle(v), { once: true });
-        v.addEventListener('seeked', () => v.classList.add('ready'), { once: true });
-        v.src = DOSSIER + 'mini/' + baseName(DATA[+en.target.dataset.i].fichier) + '.mp4';
-        en.target.appendChild(v);
-      });
-    }, { rootMargin: '200px' });
-
+    // Photos : l'original, sans réduction. Vidéos : la photo de couverture ajoutée à la main dans media/mini/ (même nom que la vidéo)
+    function frameVideo(b, d) { // secours s'il n'y a pas de photo de couverture : première image de la vidéo
+      const v = document.createElement('video');
+      v.muted = true; v.playsInline = true; v.preload = 'metadata';
+      v.src = DOSSIER + d.fichier + '#t=0.1';
+      b.appendChild(v);
+    }
     function tile(i, n) {
-      const d = DATA[i];
+      const d = DATA[i], video = isVideo(d.fichier);
       const b = document.createElement('button');
       b.type = 'button'; b.dataset.i = i;
-      b.className = 'gtile' + (isVideo(d.fichier) ? ' is-video' : '');
+      b.className = 'gtile' + (video ? ' is-video' : '');
       b.style.animationDelay = (n * 35) + 'ms';
       b.setAttribute('aria-label', 'Agrandir : ' + (d.titre || d.fichier));
-      const img = new Image();
-      img.loading = 'lazy'; img.decoding = 'async';
-      img.alt = d.titre || ('Création réalisée sur ' + (d.outil || ''));
-      img.src = DOSSIER + 'mini/' + (isVideo(d.fichier) ? baseName(d.fichier) + '.jpg' : d.fichier);
-      if (!isVideo(d.fichier)) img.onerror = () => { if (!img.dataset.fb) { img.dataset.fb = '1'; img.src = DOSSIER + d.fichier; } };
-      b.appendChild(img);
-      if (isVideo(d.fichier)) vio.observe(b);
+      const src = video ? d.miniature : d.fichier;
+      if (src) {
+        const img = new Image();
+        img.loading = 'lazy'; img.decoding = 'async';
+        img.alt = d.titre || ('Création réalisée sur ' + (d.outil || ''));
+        if (video) img.onerror = () => { img.remove(); frameVideo(b, d); };
+        img.src = DOSSIER + src;
+        b.appendChild(img);
+      } else frameVideo(b, d);
       return b;
     }
     // on n'ajoute que 12 vignettes à la fois : la page reste légère même avec des centaines de créations
@@ -564,13 +557,14 @@
     }
     function reset() {
       view = DATA.map((d, i) => i).filter(i => cat === 'all' || hasCat(DATA[i], cat));
-      vio.disconnect(); grid.replaceChildren(); shown = 0; addMore();
+      grid.replaceChildren(); shown = 0; addMore();
     }
     more.addEventListener('click', addMore);
 
-    // ---- filtres (les catégories vides n'apparaissent pas) ----
-    const CATS = [['all', 'Tout'], ['3d', '3D / Blender'], ['mapper', 'Mapper'], ['vfx', 'VFX'], ['gfx', 'GFX'], ['ui', 'UI'], ['luau', 'Luau'], ['ugc', 'UGC']];
-    const available = CATS.filter(([k]) => k === 'all' || DATA.some(d => hasCat(d, k)));
+    // ---- filtres : les catégories viennent des noms de fichiers (même nom = même catégorie) ----
+    const cats = new Map();
+    DATA.forEach(d => { const k = keyOf(d); if (k && !cats.has(k)) cats.set(k, d.categorie.trim()); });
+    const available = [['all', 'Tout']].concat([...cats].sort((a, b) => a[1].localeCompare(b[1], 'fr')));
     if (available.length <= 1) filtersEl.hidden = true;
     available.forEach(([k, label]) => {
       const b = document.createElement('button');
@@ -586,28 +580,13 @@
       filtersEl.appendChild(b);
     });
 
-    // ---- aperçu vidéo au survol (souris uniquement) : on lance la vidéo de la vignette, elle revient sur le milieu en sortant ----
-    if (canHover) {
-      grid.addEventListener('mouseover', (e) => {
-        const t = e.target.closest('.gtile.is-video');
-        if (!t || t.contains(e.relatedTarget)) return;
-        const v = t.querySelector('video');
-        if (v && v.classList.contains('ready')) v.play().catch(() => {});
-      });
-      grid.addEventListener('mouseout', (e) => {
-        const t = e.target.closest('.gtile.is-video');
-        if (!t || t.contains(e.relatedTarget)) return;
-        const v = t.querySelector('video');
-        if (v) { v.pause(); middle(v); }
-      });
-    }
-
     // ---- zoom (lightbox) avec flèches, clavier et glissement du doigt ----
     function show(p) {
       pos = (p + view.length) % view.length;
       const d = DATA[view[pos]];
       if (isVideo(d.fichier)) {
         lb.classList.add('video'); lbImg.removeAttribute('src');
+        lbVid.preload = 'auto'; lbVid.poster = d.miniature ? DOSSIER + d.miniature : '';
         lbVid.src = DOSSIER + d.fichier; lbVid.play().catch(() => {});
       } else {
         lb.classList.remove('video');
@@ -628,8 +607,6 @@
     grid.addEventListener('click', (e) => {
       const t = e.target.closest('.gtile');
       if (!t) return;
-      const pv = t.querySelector('video');
-      if (pv) pv.pause();
       show(view.indexOf(+t.dataset.i));
     });
     lbPrev.addEventListener('click', () => show(pos - 1));
