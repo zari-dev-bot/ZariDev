@@ -4,6 +4,8 @@ Prépare la galerie à partir du dossier media/ :
   - media/mini/...        petites versions des images, image du milieu + petit extrait des vidéos
   - media/galerie.json    la liste lue par le site
 GitHub lance ce script tout seul à chaque mise en ligne : rien à faire à la main.
+
+Nom des fichiers :  catégorie - outil - titre.png   (ex : ui - figma - Bouton Luck.png)
 """
 import json
 import re
@@ -17,9 +19,29 @@ MINI = MEDIA / "mini"
 IMAGES = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 VIDEOS = {".mp4", ".webm", ".mov"}
 CATEGORIES = {"3d", "mapper", "vfx", "gfx", "ui", "luau", "ugc"}
-# Outil affiché par défaut selon la catégorie (modifiable). Laisse vide pour ne rien afficher.
+# Outil affiché par défaut selon la catégorie quand le nom du fichier n'en contient pas (modifiable).
 OUTILS = {"3d": "Blender", "ugc": "Blender", "vfx": "Roblox Studio", "mapper": "Roblox Studio", "luau": "Roblox Studio"}
 LARGEUR = 480  # largeur des miniatures (assez net sur écran retina)
+
+
+def majuscules(texte):
+    """Met une majuscule à chaque mot (figma -> Figma, after effects -> After Effects) si tout est en minuscules."""
+    texte = texte.replace("_", " ").strip()
+    if texte != texte.lower():
+        return texte
+    return " ".join(m[:1].upper() + m[1:] for m in texte.split())
+
+
+def analyser_nom(rel):
+    """Nom du type  ui - figma - Bouton Luck.png  ->  (catégorie, outil, titre). Le "-" sépare les 3 parties.
+    Fonctionne aussi avec  ui - Bouton Luck.png  (sans outil) et avec un numéro devant pour l'ordre : 01 - ui - figma - Bouton Luck.png"""
+    nom = re.sub(r"^\d+\s*[-_]\s*", "", Path(rel).stem)
+    parts = [x.strip() for x in re.split(r"\s*[-–—]\s*", nom, maxsplit=2)]
+    if len(parts) < 2 or parts[0].lower() not in CATEGORIES:
+        return "", "", ""
+    if len(parts) == 2:
+        return parts[0].lower(), "", parts[1].replace("_", " ")
+    return parts[0].lower(), majuscules(parts[1]), parts[2].replace("_", " ")
 
 
 def trouver_categorie(rel):
@@ -40,7 +62,7 @@ def joli_titre(nom_fichier, cat=""):
 
 
 def lire_infos():
-    """media/infos.txt (facultatif) : fichier | catégorie | outil | titre. Les champs vides prennent la valeur automatique."""
+    """media/infos.txt (facultatif, pour les anciens fichiers) : fichier | catégorie | outil | titre. Les champs vides prennent la valeur automatique."""
     infos = {}
     f = MEDIA / "infos.txt"
     if not f.exists():
@@ -122,17 +144,18 @@ def main():
         if rel not in trouves:
             print(f"  ! infos.txt : fichier introuvable dans media/ : {rel}")
 
-    # d'abord l'ordre de infos.txt, ensuite le reste par nom de fichier (préfixe "01-", "02-"... pour choisir l'ordre)
+    # d'abord l'ordre de infos.txt, ensuite le reste par nom de fichier (préfixe "01 - ", "02 - "... pour choisir l'ordre)
     ordre = [r for r in infos if r in trouves] + [r for r in trouves if r not in infos]
     liste = []
     for rel in ordre:
         src, info = trouves[rel], infos.get(rel, {})
-        cat = info.get("categorie") or trouver_categorie(rel)
+        cat_nom, outil_nom, titre_nom = analyser_nom(rel)
+        cat = info.get("categorie") or cat_nom or trouver_categorie(rel)
         liste.append({
             "fichier": rel,
             "categorie": cat,
-            "outil": info.get("outil") or OUTILS.get(cat, ""),
-            "titre": info.get("titre") or joli_titre(rel.split("/")[-1], cat),
+            "outil": info.get("outil") or outil_nom or OUTILS.get(cat, ""),
+            "titre": info.get("titre") or titre_nom or joli_titre(rel.split("/")[-1], cat),
         })
         if src.suffix.lower() in IMAGES:
             mini_image(src, MINI / rel)
