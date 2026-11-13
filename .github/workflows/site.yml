@@ -1,25 +1,23 @@
-name: Mise en ligne du site
+name: Galerie
 
 on:
   push:
-    branches: [main, master]
+    paths:
+      - "media/**"
+      - ".github/galerie.py"
+      - ".github/workflows/site.yml"
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: galerie
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  galerie:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,8 +30,12 @@ jobs:
           sudo apt-get install -y ffmpeg
       - name: Préparer la galerie
         run: python .github/galerie.py
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Enregistrer le résultat dans le dépôt
+        run: |
+          git config user.name "galerie-bot"
+          git config user.email "galerie-bot@users.noreply.github.com"
+          git add media
+          git diff --cached --quiet && exit 0
+          git commit -m "Galerie : miniatures et liste mises à jour"
+          git pull --rebase
+          git push
