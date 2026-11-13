@@ -397,7 +397,6 @@
 
 <footer>© Zari — Portfolio</footer>
 
-<script src="creations.js"></script>
 <script>
   // ---- MODIFIE ICI tes vrais liens : ils remplissent automatiquement tous les boutons ----
   const LINKS = {
@@ -494,14 +493,20 @@
   });
 
   // ---- Galerie : grille filtrable, chargement progressif, vidéo au survol, zoom avec flèches ----
-  (function initGallery() {
+  (async function initGallery() {
     const sec = document.getElementById('gallery');
-    const DATA = (typeof CREATIONS !== 'undefined' && Array.isArray(CREATIONS)) ? CREATIONS : [];
+    // la liste (media/galerie.json) est préparée automatiquement par GitHub à chaque mise en ligne
+    let DATA = [];
+    try {
+      const r = await fetch('media/galerie.json', { cache: 'no-cache' });
+      if (r.ok) DATA = await r.json();
+    } catch (e) { /* page ouverte en local : pas de liste */ }
+    DATA = Array.isArray(DATA) ? DATA.filter(d => d && typeof d.fichier === 'string') : [];
     const DOSSIER = (typeof DOSSIER_MEDIA !== 'undefined') ? DOSSIER_MEDIA : 'media/';
     if (!DATA.length) {
       sec.hidden = true;
       document.querySelectorAll('a[href="#gallery"]').forEach(a => a.hidden = true);
-      console.warn('Galerie masquée : creations.js est introuvable ou vide.');
+      console.warn('Galerie masquée : media/galerie.json est introuvable ou vide (il est créé par GitHub à la mise en ligne, il n\'existe pas en ouvrant le fichier en local).');
       return;
     }
     const grid = document.getElementById('galleryGrid'), more = document.getElementById('galleryMore');
@@ -542,6 +547,7 @@
       img.loading = 'lazy'; img.decoding = 'async';
       img.alt = d.titre || ('Création réalisée sur ' + (d.outil || ''));
       img.src = DOSSIER + 'mini/' + (isVideo(d.fichier) ? baseName(d.fichier) + '.jpg' : d.fichier);
+      if (!isVideo(d.fichier)) img.onerror = () => { if (!img.dataset.fb) { img.dataset.fb = '1'; img.src = DOSSIER + d.fichier; } };
       b.appendChild(img);
       if (isVideo(d.fichier)) vio.observe(b);
       return b;
