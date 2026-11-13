@@ -1,169 +1,95 @@
 #!/usr/bin/env python3
 """
-Prépare la galerie à partir du dossier media/ :
-  - media/mini/...        petites versions des images, image du milieu + petit extrait des vidéos
-  - media/galerie.json    la liste lue par le site
-GitHub lance ce script tout seul à chaque mise en ligne : rien à faire à la main.
+Prépare la liste de la galerie : media/galerie.json (lue par le site). Rien n'est redimensionné ni coupé.
 
-Nom des fichiers :  catégorie - outil - titre.png   (ex : ui - figma - Bouton Luck.png)
+Nom des fichiers :  CATÉGORIE - outil - titre.png       (ex : SPOTIFY - Chaise - Mon titre.png)
+  - la catégorie est créée toute seule ; même nom = même catégorie (SPOTIFY et spotify, c'est la même)
+  - sans outil :  CATÉGORIE - titre.png      sans rien :  titre.png (visible seulement dans "Tout")
+  - pour choisir l'ordre, mets un numéro devant :  01 - SPOTIFY - Chaise - Mon titre.png
+
+Photos : l'original est affiché tel quel.
+Vidéos : la photo de couverture est celle que tu ajoutes toi-même dans media/mini/, avec le MÊME NOM que la vidéo
+         (ex : media/SPOTIFY - Chaise - Pub.mp4  ->  media/mini/SPOTIFY - Chaise - Pub.png)
 """
 import json
 import re
-import subprocess
 from pathlib import Path
-
-from PIL import Image, ImageOps
 
 MEDIA = Path("media")
 MINI = MEDIA / "mini"
-IMAGES = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+IMAGES = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"}
 VIDEOS = {".mp4", ".webm", ".mov"}
-CATEGORIES = {"3d", "mapper", "vfx", "gfx", "ui", "luau", "ugc"}
-# Outil affiché par défaut selon la catégorie quand le nom du fichier n'en contient pas (modifiable).
-OUTILS = {"3d": "Blender", "ugc": "Blender", "vfx": "Roblox Studio", "mapper": "Roblox Studio", "luau": "Roblox Studio"}
-LARGEUR = 480  # largeur des miniatures (assez net sur écran retina)
+COUVERTURES = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
 
 
 def majuscules(texte):
-    """Met une majuscule à chaque mot (figma -> Figma, after effects -> After Effects) si tout est en minuscules."""
+    """figma -> Figma, after effects -> After Effects (seulement si tout est en minuscules)."""
     texte = texte.replace("_", " ").strip()
     if texte != texte.lower():
         return texte
     return " ".join(m[:1].upper() + m[1:] for m in texte.split())
 
 
-def analyser_nom(rel):
-    """Nom du type  ui - figma - Bouton Luck.png  ->  (catégorie, outil, titre). Le "-" sépare les 3 parties.
-    Fonctionne aussi avec  ui - Bouton Luck.png  (sans outil) et avec un numéro devant pour l'ordre : 01 - ui - figma - Bouton Luck.png"""
-    nom = re.sub(r"^\d+\s*[-_]\s*", "", Path(rel).stem)
-    parts = [x.strip() for x in re.split(r"\s*[-–—]\s*", nom, maxsplit=2)]
-    if len(parts) < 2 or parts[0].lower() not in CATEGORIES:
-        return "", "", ""
+def analyser(nom):
+    """'SPOTIFY - Chaise - Mon titre' -> ('SPOTIFY', 'Chaise', 'Mon titre')"""
+    parts = [x.strip() for x in re.split(r"\s+[-–—]\s+", nom) if x.strip()]
+    if len(parts) >= 3 and parts[0].isdigit():  # "01 - " devant le nom : sert seulement à ordonner
+        parts = parts[1:]
+    if len(parts) >= 3:
+        return parts[0], majuscules(parts[1]), " - ".join(parts[2:])
     if len(parts) == 2:
-        return parts[0].lower(), "", parts[1].replace("_", " ")
-    return parts[0].lower(), majuscules(parts[1]), parts[2].replace("_", " ")
+        return parts[0], "", parts[1]
+    titre = re.sub(r"[-_]+", " ", parts[0] if parts else nom).strip()
+    return "", "", titre[:1].upper() + titre[1:]
 
 
-def trouver_categorie(rel):
-    """Cherche la catégorie dans le nom du fichier (3d-casque.png, aura_vfx.mp4, "ui bouton.png"...) ou dans son dossier."""
-    dossiers = [x.lower() for x in rel.split("/")[:-1]]
-    mots = re.split(r"[-_ .]+", Path(rel).stem.lower())
-    for m in mots + dossiers:
-        if m in CATEGORIES:
-            return m
-    return ""
-
-
-def joli_titre(nom_fichier, cat=""):
-    nom = re.sub(r"^\d+[-_ ]+", "", Path(nom_fichier).stem)  # "01-" au début sert juste à ordonner
-    mots = [m for m in re.split(r"[-_ ]+", nom) if m and m.lower() != cat]  # le mot de la catégorie n'est pas répété dans le titre
-    nom = " ".join(mots) or nom
-    return nom[:1].upper() + nom[1:]
-
-
-def lire_infos():
-    """media/infos.txt (facultatif, pour les anciens fichiers) : fichier | catégorie | outil | titre. Les champs vides prennent la valeur automatique."""
-    infos = {}
-    f = MEDIA / "infos.txt"
-    if not f.exists():
-        return infos
-    for ligne in f.read_text(encoding="utf-8").splitlines():
-        ligne = ligne.strip()
-        if not ligne or ligne.startswith("#"):
-            continue
-        p = [x.strip() for x in ligne.split("|")]
-        infos[p[0]] = {
-            "categorie": (p[1] if len(p) > 1 else "").lower(),
-            "outil": p[2] if len(p) > 2 else "",
-            "titre": " | ".join(p[3:]) if len(p) > 3 else "",
-        }
-    return infos
-
-
-def mini_image(src, dest):
-    if dest.exists():
-        return
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        with Image.open(src) as im:
-            im = ImageOps.exif_transpose(im)
-            im.thumbnail((LARGEUR, 10000))
-            ext = src.suffix.lower()
-            if ext in (".jpg", ".jpeg"):
-                im.convert("RGB").save(dest, "JPEG", quality=80, optimize=True, progressive=True)
-            elif ext == ".webp":
-                im.save(dest, "WEBP", quality=80)
-            elif ext == ".gif":
-                im.save(dest, "GIF")
-            else:
-                im.save(dest, "PNG", optimize=True)
-    except Exception as e:  # le site prendra l'image d'origine à la place
-        print(f"  ! miniature impossible pour {src} : {e}")
-
-
-def duree(src):
-    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(src)],
-                       capture_output=True, text=True)
-    try:
-        return float(r.stdout.strip())
-    except ValueError:
-        return 0.0
-
-
-def mini_video(src, rel):
-    """Image du MILIEU de la vidéo + extrait de 4 s centré sur ce milieu (le site se cale au milieu de l'extrait)."""
-    base = rel.rsplit(".", 1)[0]
-    poster, clip = MINI / (base + ".jpg"), MINI / (base + ".mp4")
-    if poster.exists() and clip.exists():
-        return
-    poster.parent.mkdir(parents=True, exist_ok=True)
-    d = duree(src)
-    mid = d / 2
-    echelle = f"scale={LARGEUR}:-2"
-    if not poster.exists():
-        subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", f"{mid:.2f}", "-i", str(src), "-frames:v", "1",
-                        "-vf", echelle, "-q:v", "4", str(poster)])
-    if not clip.exists():
-        subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", f"{max(0.0, mid - 2):.2f}", "-i", str(src), "-t", "4",
-                        "-vf", echelle + ",fps=24", "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "32",
-                        "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(clip)])
+def cle_tri(chemin):
+    """Tri naturel : 2 avant 10, sans tenir compte des majuscules."""
+    return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", chemin.lower())]
 
 
 def main():
-    infos = lire_infos()
-    trouves = {}
-    for p in sorted(MEDIA.rglob("*")):
+    couvertures = {}
+    if MINI.exists():
+        for p in MINI.rglob("*"):
+            if p.is_file() and p.suffix.lower() in COUVERTURES:
+                couvertures[p.relative_to(MINI).as_posix().lower()] = p.relative_to(MEDIA).as_posix()
+
+    fichiers = []
+    for p in MEDIA.rglob("*"):
         if not p.is_file() or MINI in p.parents or p.suffix.lower() not in IMAGES | VIDEOS:
             continue
         rel = p.relative_to(MEDIA).as_posix()
         if re.search(r"[#?%]", rel):
             print(f"  ! ignoré (caractère # ? ou % dans le nom) : {rel}")
             continue
-        trouves[rel] = p
-    for rel in infos:
-        if rel not in trouves:
-            print(f"  ! infos.txt : fichier introuvable dans media/ : {rel}")
+        fichiers.append(rel)
+    fichiers.sort(key=cle_tri)
 
-    # d'abord l'ordre de infos.txt, ensuite le reste par nom de fichier (préfixe "01 - ", "02 - "... pour choisir l'ordre)
-    ordre = [r for r in infos if r in trouves] + [r for r in trouves if r not in infos]
+    analyses = {rel: analyser(Path(rel).stem) for rel in fichiers}
+    # même catégorie = même nom, majuscules ou pas. Le nom affiché est l'écriture la plus utilisée (à égalité : celle avec le plus de majuscules)
+    ecritures = {}
+    for cat, _, _ in analyses.values():
+        if cat:
+            ecritures.setdefault(cat.lower(), {}).setdefault(cat, 0)
+            ecritures[cat.lower()][cat] += 1
+    categories = {k: max(v, key=lambda e: (v[e], sum(c.isupper() for c in e))) for k, v in ecritures.items()}
+
     liste = []
-    for rel in ordre:
-        src, info = trouves[rel], infos.get(rel, {})
-        cat_nom, outil_nom, titre_nom = analyser_nom(rel)
-        cat = info.get("categorie") or cat_nom or trouver_categorie(rel)
-        liste.append({
-            "fichier": rel,
-            "categorie": cat,
-            "outil": info.get("outil") or outil_nom or OUTILS.get(cat, ""),
-            "titre": info.get("titre") or titre_nom or joli_titre(rel.split("/")[-1], cat),
-        })
-        if src.suffix.lower() in IMAGES:
-            mini_image(src, MINI / rel)
-        else:
-            mini_video(src, rel)
+    for rel in fichiers:
+        cat, outil, titre = analyses[rel]
+        if cat:
+            cat = categories[cat.lower()]
+        miniature = ""
+        if Path(rel).suffix.lower() in VIDEOS:
+            base = rel.rsplit(".", 1)[0].lower()
+            miniature = next((couvertures[base + e] for e in COUVERTURES if base + e in couvertures), "")
+            if not miniature:
+                print(f"  ! pas de photo de couverture pour {rel} : ajoute media/mini/{rel.rsplit('.', 1)[0]}.png")
+        liste.append({"fichier": rel, "categorie": cat, "outil": outil, "titre": titre, "miniature": miniature})
 
     (MEDIA / "galerie.json").write_text(json.dumps(liste, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"Galerie : {len(liste)} créations.")
+    print(f"Galerie : {len(liste)} créations, {len(categories)} catégories.")
 
 
 if __name__ == "__main__":
