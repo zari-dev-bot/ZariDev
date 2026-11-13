@@ -1,38 +1,44 @@
 [
  {
   "fichier": "3D - Blender - Zari on grass.mp4",
-  "categorie": "3d",
+  "categorie": "3D",
   "outil": "Blender",
-  "titre": "Zari on grass"
+  "titre": "Zari on grass",
+  "miniature": "mini/3D - Blender - Zari on grass.jpg"
  },
  {
   "fichier": "UI - Figma - UI Fiul_Money_Gemmes.png",
-  "categorie": "ui",
+  "categorie": "UI",
   "outil": "Figma",
-  "titre": "UI Fiul Money Gemmes"
- },
- {
-  "fichier": "UI - Figma - UI Rebirth.png",
-  "categorie": "ui",
-  "outil": "Figma",
-  "titre": "UI Rebirth"
+  "titre": "UI Fiul_Money_Gemmes",
+  "miniature": ""
  },
  {
   "fichier": "UI - Figma - Ui Luck.png",
-  "categorie": "ui",
+  "categorie": "UI",
   "outil": "Figma",
-  "titre": "Ui Luck"
+  "titre": "Ui Luck",
+  "miniature": ""
+ },
+ {
+  "fichier": "UI - Figma - UI Rebirth.png",
+  "categorie": "UI",
+  "outil": "Figma",
+  "titre": "UI Rebirth",
+  "miniature": ""
  },
  {
   "fichier": "UI - Figma - Ui Settings (my first UI).png",
-  "categorie": "ui",
+  "categorie": "UI",
   "outil": "Figma",
-  "titre": "Ui Settings (my first UI)"
+  "titre": "Ui Settings (my first UI)",
+  "miniature": ""
  },
  {
   "fichier": "Ui - Figma - Ui Upgrade Gold.png",
-  "categorie": "ui",
+  "categorie": "UI",
   "outil": "Figma",
-  "titre": "Ui Upgrade Gold"
+  "titre": "Ui Upgrade Gold",
+  "miniature": ""
  }
 ]
