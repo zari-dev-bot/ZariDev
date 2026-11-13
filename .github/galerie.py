@@ -22,9 +22,20 @@ OUTILS = {"3d": "Blender", "ugc": "Blender", "vfx": "Roblox Studio", "mapper": "
 LARGEUR = 480  # largeur des miniatures (assez net sur écran retina)
 
 
-def joli_titre(nom_fichier):
+def trouver_categorie(rel):
+    """Cherche la catégorie dans le nom du fichier (3d-casque.png, aura_vfx.mp4, "ui bouton.png"...) ou dans son dossier."""
+    dossiers = [x.lower() for x in rel.split("/")[:-1]]
+    mots = re.split(r"[-_ .]+", Path(rel).stem.lower())
+    for m in mots + dossiers:
+        if m in CATEGORIES:
+            return m
+    return ""
+
+
+def joli_titre(nom_fichier, cat=""):
     nom = re.sub(r"^\d+[-_ ]+", "", Path(nom_fichier).stem)  # "01-" au début sert juste à ordonner
-    nom = re.sub(r"[-_]+", " ", nom).strip()
+    mots = [m for m in re.split(r"[-_ ]+", nom) if m and m.lower() != cat]  # le mot de la catégorie n'est pas répété dans le titre
+    nom = " ".join(mots) or nom
     return nom[:1].upper() + nom[1:]
 
 
@@ -116,13 +127,12 @@ def main():
     liste = []
     for rel in ordre:
         src, info = trouves[rel], infos.get(rel, {})
-        dossier = rel.split("/")[0].lower() if "/" in rel else ""
-        cat = info.get("categorie") or (dossier if dossier in CATEGORIES else "")
+        cat = info.get("categorie") or trouver_categorie(rel)
         liste.append({
             "fichier": rel,
             "categorie": cat,
             "outil": info.get("outil") or OUTILS.get(cat, ""),
-            "titre": info.get("titre") or joli_titre(rel.split("/")[-1]),
+            "titre": info.get("titre") or joli_titre(rel.split("/")[-1], cat),
         })
         if src.suffix.lower() in IMAGES:
             mini_image(src, MINI / rel)
