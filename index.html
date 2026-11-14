@@ -116,15 +116,18 @@
 
   header { width: min(732px, calc(100% - 3rem)); margin: 4rem auto 0; padding: 3.2rem 2rem; border-radius: 26px; position: relative; z-index: 1; }
   .tag { color: var(--blue-deep); font-weight: 600; font-size: 0.95rem; }
-  /* Pseudo : dégradé qui coule en boucle. width: fit-content = le dégradé épouse le mot (sinon il s'étire sur toute la carte).
-     Le dégradé finit sur la couleur par laquelle il commence et se déplace d'exactement sa longueur : la boucle ne se voit pas. */
+  /* Pseudo : uniquement des bleus. 2 couches : un reflet bleu glacé qui traverse le mot (dessus) + un dégradé de bleus qui coule (dessous).
+     width: fit-content = le dégradé épouse le mot. Le dégradé finit sur sa couleur de départ et avance d'exactement sa longueur : la boucle ne se voit pas. */
   header h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); font-weight: 800; margin-top: 0.6rem; letter-spacing: -0.02em; width: fit-content;
-    background-image: linear-gradient(90deg, #3B6BFF 0%, #6FE3FF 18%, #FFFFFF 32%, #B08CFF 50%, #6FA0FF 68%, #6FE3FF 84%, #3B6BFF 100%);
-    background-size: 200% 100%; background-repeat: repeat-x;
+    background-image:
+      linear-gradient(100deg, rgba(190,220,255,0) 42%, rgba(205,228,255,0.95) 50%, rgba(190,220,255,0) 58%),
+      linear-gradient(90deg, #2756F0 0%, #3A78FF 22%, #6AA6FF 42%, #A9CCFF 52%, #4C86FF 72%, #2756F0 100%);
+    background-size: 300% 100%, 200% 100%; background-repeat: no-repeat, repeat-x;
     -webkit-background-clip: text; background-clip: text; color: transparent;
-    filter: drop-shadow(0 0 16px rgba(76,134,255,0.55));
-    animation: nameflow 6s linear infinite; }
-  @keyframes nameflow { from { background-position: 0% 0; } to { background-position: 200% 0; } }
+    filter: drop-shadow(0 0 14px rgba(60,120,255,0.5));
+    animation: nameflow 6s linear infinite, nameglow 3s ease-in-out infinite alternate; }
+  @keyframes nameflow { from { background-position: 0% 0, 0% 0; } to { background-position: 100% 0, 200% 0; } }
+  @keyframes nameglow { from { filter: drop-shadow(0 0 8px rgba(60,120,255,0.32)); } to { filter: drop-shadow(0 0 24px rgba(60,120,255,0.72)); } }
   header p.role { color: var(--muted); font-size: 1.2rem; margin-top: 0.8rem; }
   header p.pitch { margin-top: 1.5rem; max-width: 60ch; font-size: 1.05rem; }
 
