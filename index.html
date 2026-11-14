@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="only light">
-<meta name="theme-color" content="#2E6BFF">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#05060D">
 <meta name="description" content="Zari, 17 ans, développeur Roblox : 3D / Blender, Mapper, VFX, GFX, UI, Luau et UGC. Découvre mes créations.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Zari — Développeur Roblox">
@@ -19,14 +19,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    color-scheme: only light;
-    --blue-deep: #0B2559;
-    --ink: #0C2352;
-    --muted: #3E5480;
-    --glass: rgba(255,255,255,0.22);
-    --glass-strong: rgba(255,255,255,0.4);
-    --border: rgba(255,255,255,0.65);
-    --shadow: rgba(11,37,89,0.3);
+    color-scheme: dark;
+    --blue-deep: #EAF1FF;
+    --ink: #E3EAFF;
+    --muted: #98ABD9;
+    --glass: rgba(255,255,255,0.06);
+    --glass-strong: rgba(255,255,255,0.13);
+    --border: rgba(255,255,255,0.16);
+    --shadow: rgba(0,0,0,0.6);
     box-sizing: border-box;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -35,24 +35,25 @@
   html { scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
   body {
     margin: 0; color: var(--ink); font-family: 'Inter', system-ui, sans-serif; line-height: 1.6;
-    background: #2E6BFF; overflow-x: hidden; min-height: 100%;
+    background-color: #05060D; overflow-x: hidden;
+    /* halo bleu doux en haut de page + dégradé du noir vers un bleu nuit tout en bas */
+    background-image: radial-gradient(ellipse 75% 560px at 50% 0%, rgba(46,107,255,0.34), rgba(46,107,255,0) 72%),
+                      linear-gradient(180deg, #05060D 0%, #05060D 35%, #06102E 75%, #0A1B55 100%); min-height: 100%;
   }
-  body::before { content: ""; position: fixed; inset: 0; z-index: -3; pointer-events: none;
-    background: linear-gradient(160deg, #1747D6 0%, #2E6BFF 26%, #6FA0FF 52%, #B7D5FF 78%, #EAF3FF 100%); }
   h1, h2, h3 { font-family: 'Sora', 'Inter', sans-serif; margin: 0; color: var(--blue-deep); }
 
   .noise { position: fixed; inset: 0; z-index: 6; pointer-events: none; opacity: 0.04;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
 
   /* progress bar */
   #progress { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; height: 3px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 20;
     background: linear-gradient(90deg, #4C86FF, #8FE9E0); box-shadow: 0 0 10px rgba(76,134,255,0.6); }
 
-  .nebula-clouds { position: fixed; inset: -12%; z-index: -2; pointer-events: none; opacity: 0.45; will-change: transform;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='900'><filter id='n1'><feTurbulence type='fractalNoise' baseFrequency='0.010 0.016' numOctaves='4' seed='11' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='matrix' values='0 0 0 0 0.42  0 0 0 0 0.55  0 0 0 0 0.97  0 0 0 0.9 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n1)'/></svg>");
+  .nebula-clouds { position: fixed; inset: -12%; z-index: -2; pointer-events: none; opacity: 0.1; will-change: transform;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='900'><filter id='n1' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.010 0.016' numOctaves='4' seed='11' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='matrix' values='0 0 0 0 0.42  0 0 0 0 0.55  0 0 0 0 0.97  0 0 0 0.9 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n1)'/></svg>");
     background-size: 900px 900px; animation: nebulaDrift 90s ease-in-out infinite alternate; }
-  .nebula-clouds.layer2 { z-index: -2; opacity: 0.28;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1100' height='1100'><filter id='n2'><feTurbulence type='fractalNoise' baseFrequency='0.006 0.010' numOctaves='3' seed='42' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='matrix' values='0 0 0 0 0.98  0 0 0 0 0.62  0 0 0 0 0.9  0 0 0 0.8 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n2)'/></svg>");
+  .nebula-clouds.layer2 { z-index: -2; opacity: 0.06;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1100' height='1100'><filter id='n2' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.006 0.010' numOctaves='3' seed='42' stitchTiles='stitch' result='t'/><feColorMatrix in='t' type='matrix' values='0 0 0 0 0.98  0 0 0 0 0.62  0 0 0 0 0.9  0 0 0 0.8 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n2)'/></svg>");
     background-size: 1100px 1100px; animation: nebulaDriftReverse 120s ease-in-out infinite alternate; }
   @keyframes nebulaDrift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-5%, 3%, 0); } }
   @keyframes nebulaDriftReverse { from { transform: translate3d(0,0,0); } to { transform: translate3d(4%, -3%, 0); } }
@@ -84,7 +85,7 @@
   .orb2 { width: 400px; height: 400px; opacity: 0.55; top: 26vh; right: -170px; animation-duration: 13s;
     background: radial-gradient(circle at 38% 35%, #C6A6FF, transparent 60%), radial-gradient(circle at 65% 65%, #FF9DE0, transparent 55%), radial-gradient(circle at 20% 70%, #7FF0FF, transparent 55%); }
   .orb3 { width: 360px; height: 360px; opacity: 0.42; bottom: -130px; left: 16vw; animation-duration: 15s;
-    background: radial-gradient(circle at 50% 45%, #FFFFFF, transparent 65%), radial-gradient(circle at 70% 70%, #B7D5FF, transparent 55%); }
+    background: radial-gradient(circle at 50% 45%, #4C86FF, transparent 65%), radial-gradient(circle at 70% 70%, #2E5BE0, transparent 55%); }
   .orb4 { width: 280px; height: 280px; opacity: 0.45; bottom: 6vh; right: 8vw; animation-duration: 10s;
     background: radial-gradient(circle at 45% 40%, #4FF0D0, transparent 58%), radial-gradient(circle at 70% 65%, #6FA0FF, transparent 55%); }
   .orb5 { width: 220px; height: 220px; opacity: 0.38; top: 55vh; left: 45vw; animation-duration: 12s;
@@ -106,19 +107,24 @@
   nav a:hover { opacity: 1; transform: translateY(-2px); } nav a:hover::after { width: 100%; }
 
   .glass { background: var(--glass); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
-    border: 1px solid var(--border); box-shadow: 0 14px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.65);
+    border: 1px solid var(--border); box-shadow: 0 14px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.14);
     position: relative; overflow: hidden; }
   .glass::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
-    background: radial-gradient(280px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.95), transparent 60%);
+    background: radial-gradient(280px circle at var(--mx,50%) var(--my,50%), rgba(76,134,255,0.28), transparent 60%);
     transition: opacity 0.25s ease; }
   .glass:hover::before { opacity: 1; }
 
   header { width: min(732px, calc(100% - 3rem)); margin: 4rem auto 0; padding: 3.2rem 2rem; border-radius: 26px; position: relative; z-index: 1; }
   .tag { color: var(--blue-deep); font-weight: 600; font-size: 0.95rem; }
-  header h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); font-weight: 800; margin-top: 0.6rem; letter-spacing: -0.02em;
-    background: linear-gradient(90deg, #0A2A6B, #1E7BFF, #2FD0F0, #1E7BFF, #0A2A6B); background-size: 100% 100%;
-    -webkit-background-clip: text; background-clip: text; color: transparent; }
-  @keyframes gradientmove { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  /* Pseudo : dégradé qui coule en boucle. width: fit-content = le dégradé épouse le mot (sinon il s'étire sur toute la carte).
+     Le dégradé finit sur la couleur par laquelle il commence et se déplace d'exactement sa longueur : la boucle ne se voit pas. */
+  header h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); font-weight: 800; margin-top: 0.6rem; letter-spacing: -0.02em; width: fit-content;
+    background-image: linear-gradient(90deg, #3B6BFF 0%, #6FE3FF 18%, #FFFFFF 32%, #B08CFF 50%, #6FA0FF 68%, #6FE3FF 84%, #3B6BFF 100%);
+    background-size: 200% 100%; background-repeat: repeat-x;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 16px rgba(76,134,255,0.55));
+    animation: nameflow 6s linear infinite; }
+  @keyframes nameflow { from { background-position: 0% 0; } to { background-position: 200% 0; } }
   header p.role { color: var(--muted); font-size: 1.2rem; margin-top: 0.8rem; }
   header p.pitch { margin-top: 1.5rem; max-width: 60ch; font-size: 1.05rem; }
 
@@ -154,7 +160,7 @@
   .service:nth-child(5) .ic { animation-delay: 1.6s; }
   .service:nth-child(6) .ic { animation-delay: 2s; }
 
-  @keyframes breathe { 0%,100% { box-shadow: 0 14px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.65); } 50% { box-shadow: 0 14px 55px rgba(76,134,255,0.45), inset 0 1px 0 rgba(255,255,255,0.8); } }
+  @keyframes breathe { 0%,100% { box-shadow: 0 14px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.14); } 50% { box-shadow: 0 14px 55px rgba(76,134,255,0.45), inset 0 1px 0 rgba(255,255,255,0.22); } }
 
   .btn .ic-inline, .service, .stat, .project { transition: transform 0.12s ease; }
 
@@ -178,8 +184,8 @@
   .skillcard { border-radius: 18px; padding: 1.3rem; text-align: center; transition: transform 0.45s cubic-bezier(.2,.8,.2,1), box-shadow 0.4s ease, opacity 0.4s ease, filter 0.4s ease; }
   .skillcard:hover { transform: translateY(-4px); }
   .skillcard .ring { width: 84px; height: 84px; transform: rotate(-90deg); }
-  .skillcard .ring-bg { fill: none; stroke: rgba(255,255,255,0.4); stroke-width: 8; }
-  .skillcard .ring-fill { fill: none; stroke: #2F6FED; stroke-width: 8; stroke-linecap: round;
+  .skillcard .ring-bg { fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 8; }
+  .skillcard .ring-fill { fill: none; stroke: #4C86FF; stroke-width: 8; stroke-linecap: round;
     stroke-dasharray: 226; stroke-dashoffset: 226; transition: stroke-dashoffset 1.3s cubic-bezier(.2,.8,.2,1);
     filter: drop-shadow(0 0 6px rgba(47,111,237,0.6)); }
   .skillcard .pct { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; }
@@ -190,7 +196,7 @@
   .skillcard.dimmed::after { opacity: 1; }
   .skillcard.dimmed { transform: scale(0.96); }
   .skillcard.spotlight, .skillcard.dimmed { will-change: transform; }
-  .skillcard.spotlight { transform: translateY(-14px) scale(1.07) !important; box-shadow: 0 22px 50px rgba(47,111,237,0.55), 0 0 0 3px #2F6FED, inset 0 1px 0 rgba(255,255,255,0.8); z-index: 5; }
+  .skillcard.spotlight { transform: translateY(-14px) scale(1.07) !important; box-shadow: 0 22px 50px rgba(47,111,237,0.55), 0 0 0 3px #2F6FED, inset 0 1px 0 rgba(255,255,255,0.22); z-index: 5; }
 
 
   .about { border-radius: 18px; padding: 1.8rem; }
@@ -203,7 +209,7 @@
     padding: 0.5rem 1.05rem; border-radius: 999px; background: var(--glass); border: 1px solid var(--border);
     transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, color 0.2s ease; }
   .gallery-filter:hover { background: var(--glass-strong); transform: translateY(-2px); }
-  .gallery-filter.active { background: var(--blue-deep); color: #fff; border-color: var(--blue-deep); box-shadow: 0 8px 20px var(--shadow); }
+  .gallery-filter.active { background: #2E6BFF; color: #fff; border-color: #2E6BFF; box-shadow: 0 8px 20px var(--shadow); }
   .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
   /* content-visibility : le navigateur ne dessine que les vignettes visibles, même avec des centaines de créations */
   .gtile { position: relative; display: block; width: 100%; padding: 0; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden;
@@ -243,7 +249,7 @@
   footer { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; color: var(--blue-deep); opacity: 0.85; font-size: 0.9rem; text-align: center; position: relative; z-index: 1; }
   footer a { color: var(--blue-deep); text-decoration: underline; }
 
-  ::selection { background: var(--blue-deep); color: #fff; }
+  ::selection { background: #2E6BFF; color: #fff; }
   :focus-visible { outline: 2px solid var(--blue-deep); outline-offset: 2px; }
   /* parallaxe dans les cartes : icône / titre / texte suivent la souris à des profondeurs différentes */
   /* --d = profondeur de la couche (1 = devant, petit = derrière) ; --dx/--dy = souris ; --sy = position de la carte à l'écran */
@@ -255,7 +261,7 @@
   .tilt-soft { transition: transform 0.25s ease-out; }
   /* survol façon guns.lol : la carte grossit un peu, se penche vers la souris et passe devant ses voisines */
   .service.tilt, .skillcard.tilt { transition: transform 0.4s cubic-bezier(.2,.8,.2,1), box-shadow 0.5s ease; }
-  .service.tilt:hover, .skillcard.tilt:hover { z-index: 6; box-shadow: 0 26px 60px rgba(11,37,89,0.38), inset 0 1px 0 rgba(255,255,255,0.8); }
+  .service.tilt:hover, .skillcard.tilt:hover { z-index: 6; box-shadow: 0 26px 60px rgba(11,37,89,0.38), inset 0 1px 0 rgba(255,255,255,0.22); }
   @media (max-width: 640px) {
     .glass { backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); }
     .nebula-clouds { animation: none; }
@@ -271,6 +277,17 @@
   }
   .scrolling .nebula-clouds, .scrolling .starfield { animation-play-state: paused; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  /* Fond qui défile avec la page. Chaque couche est plus haute d'une "tuile" et se recale d'une tuile entière : la répétition est invisible.
+     data-k = vitesse (0 = fixe, 1 = comme la page) : les étoiles sont les plus lentes (loin), la grille la plus rapide (proche). */
+  .gridbg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, #000 25%, transparent 85%);
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, #000 25%, transparent 85%); }
+  .gridbg i { position: absolute; left: 0; right: 0; top: calc(var(--p) * -1); bottom: 0; will-change: transform;
+    background-image: linear-gradient(rgba(76,134,255,0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(76,134,255,0.13) 1px, transparent 1px);
+    background-size: var(--p) var(--p); }
+  .nebula-clouds { inset: auto; left: 0; right: 0; bottom: 0; top: -900px; animation: none; opacity: 0.15; }
+  .nebula-clouds.layer2 { top: -1100px; animation: none; opacity: 0.1; }
+  .starfield { inset: auto; left: 0; right: 0; bottom: 0; top: -900px; background-repeat: repeat; background-size: 900px 900px; will-change: transform; }
 </style>
 </head>
 <body>
@@ -278,16 +295,10 @@
 <div class="noise"></div>
 <div id="progress"></div>
 
-<div class="nebula-clouds"></div>
-<div class="nebula-clouds layer2"></div>
-<div class="starfield"></div>
-<div class="orbwrap">
-  <div class="orb orb1" data-depth="0.6"></div>
-  <div class="orb orb2" data-depth="0.9"></div>
-  <div class="orb orb3" data-depth="0.4"></div>
-  <div class="orb orb4" data-depth="0.75"></div>
-  <div class="orb orb5" data-depth="1.1"></div>
-</div>
+<div class="nebula-clouds" data-k="0.18" data-p="900"></div>
+<div class="nebula-clouds layer2" data-k="0.3" data-p="1100"></div>
+<div class="starfield" data-k="0.1" data-p="900"></div>
+<div class="gridbg"><i style="--p:64px" data-k="0.45" data-p="64"></i></div>
 
 <nav class="glass">
   <span class="brand">ZariDev</span>
@@ -665,6 +676,13 @@
   window.addEventListener('load', measureParallax);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureParallax);
 
+  // couches de fond qui défilent avec la page : k = vitesse (0 = fixe, 1 = comme la page), p = taille de la tuile qui se répète
+  const bgLayers = Array.from(document.querySelectorAll('[data-k][data-p]')).map(el => ({ el, k: parseFloat(el.dataset.k), p: parseFloat(el.dataset.p) }));
+  function updateBg(sy) {
+    if (reduceMotionPx) return;
+    bgLayers.forEach(({ el, k, p }) => { el.style.transform = `translate3d(0, ${p - ((sy * k) % p)}px, 0)`; });
+  }
+
   const progress = document.getElementById('progress');
   const heroInner = document.getElementById('hero-inner');
   const navEl = document.querySelector('nav.glass');
@@ -675,6 +693,7 @@
     const max = document.documentElement.scrollHeight - window.innerHeight;
     progress.style.transform = `scaleX(${max > 0 ? sy / max : 0})`;
     navEl.classList.toggle('scrolled', sy > 40);
+    updateBg(sy);
     updateCardParallax();
     if (sy < 700) {
       heroDone = false;
@@ -741,20 +760,6 @@
     }
   });
 
-  // fond : les orbes bougent seulement quand on bouge la souris ou qu'on scrolle
-  const orbs = Array.from(document.querySelectorAll('.orb')).map(o => ({ el: o, depth: parseFloat(o.dataset.depth) }));
-  let mx = 0, my = 0, orbRaf = 0;
-  function updateOrbs() {
-    orbRaf = 0;
-    const sy = window.scrollY;
-    orbs.forEach(({ el, depth }) => {
-      el.style.transform = `translate3d(${mx*40*depth}px, ${my*40*depth - sy*0.12*depth}px, 0)`;
-    });
-  }
-  function queueOrbs() { if (!orbRaf) orbRaf = requestAnimationFrame(updateOrbs); }
-  if (canHover) window.addEventListener('mousemove', (e) => { mx = e.clientX / window.innerWidth - 0.5; my = e.clientY / window.innerHeight - 0.5; queueOrbs(); }, { passive: true });
-  window.addEventListener('scroll', queueOrbs, { passive: true });
-  queueOrbs();
 </script>
 
 </body>
